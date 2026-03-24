@@ -24,7 +24,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import stripeServerSideClient from "@/lib/StripeClientInitializer";
+import getStripeServerSideClient from "@/lib/StripeClientInitializer";
 
 /**
  * POST /api/stripe/checkout
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
      * success page (not implemented in v1 but ready for it).
      */
     const stripeCheckoutSession =
-      await stripeServerSideClient.checkout.sessions.create({
+      await getStripeServerSideClient().checkout.sessions.create({
         mode: "subscription",
         payment_method_types: ["card"],
         line_items: [

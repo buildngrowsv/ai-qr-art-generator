@@ -26,12 +26,12 @@
 import { fal } from "@fal-ai/client";
 
 /**
- * Configure the fal.ai client with our API key.
- * The FAL_KEY env var is set in .env.local and only available server-side.
+ * Track whether fal.ai has been configured yet.
+ * We configure lazily (inside the generation function) rather than at module scope
+ * because Next.js evaluates module-level code at build time, and FAL_KEY won't
+ * be available during build. Lazy config ensures we only read env vars at runtime.
  */
-fal.config({
-  credentials: process.env.FAL_KEY,
-});
+let falClientConfigured = false;
 
 /**
  * Input parameters for generating QR code art.
@@ -93,6 +93,17 @@ export interface QrArtGenerationResult {
 export async function generateQrCodeArtWithFalAi(
   input: QrArtGenerationInput
 ): Promise<QrArtGenerationResult> {
+  /**
+   * Lazy-initialize the fal.ai client with credentials.
+   * This runs once on first generation call, not at module load time.
+   */
+  if (!falClientConfigured) {
+    fal.config({
+      credentials: process.env.FAL_KEY,
+    });
+    falClientConfigured = true;
+  }
+
   /**
    * Call fal.ai's QR Code ControlNet model.
    *

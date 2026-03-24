@@ -26,7 +26,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import stripeServerSideClient from "@/lib/StripeClientInitializer";
+import getStripeServerSideClient from "@/lib/StripeClientInitializer";
 
 /**
  * POST /api/stripe/portal
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
      * confirmation message if needed.
      */
     const portalSession =
-      await stripeServerSideClient.billingPortal.sessions.create({
+      await getStripeServerSideClient().billingPortal.sessions.create({
         customer: customerId,
         return_url: `${appBaseUrl}/dashboard?portal=returned`,
       });

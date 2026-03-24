@@ -26,7 +26,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import stripeServerSideClient from "@/lib/StripeClientInitializer";
+import getStripeServerSideClient from "@/lib/StripeClientInitializer";
 import Stripe from "stripe";
 
 /**
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     let verifiedStripeEvent: Stripe.Event;
 
     try {
-      verifiedStripeEvent = stripeServerSideClient.webhooks.constructEvent(
+      verifiedStripeEvent = getStripeServerSideClient().webhooks.constructEvent(
         rawRequestBody,
         stripeSignatureHeader,
         webhookSecret
