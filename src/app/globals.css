@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/*
+ * AI QR Art Generator — Global Styles
+ *
+ * This file defines the design system for the entire application. We chose a dark-first
+ * aesthetic with vibrant purple/indigo gradients because:
+ * 1. AI/creative tools feel more premium with dark themes
+ * 2. QR art images "pop" better against dark backgrounds
+ * 3. The gradient system creates visual continuity across all pages
+ *
+ * The color palette was chosen to evoke creativity, technology, and premium quality —
+ * purple/violet for creativity, indigo for trust/technology, and accent colors for CTAs.
+ */
+
+:root {
+  /*
+   * Core color tokens — dark theme is default because our target audience
+   * (designers, marketers, developers) prefers dark UIs for creative tools.
+   * Light mode is intentionally NOT implemented in v1 to keep scope manageable.
+   */
+  --background: #0a0a0f;
+  --foreground: #f0f0f5;
+  --card-background: #13131a;
+  --card-border: #1e1e2e;
+  --accent-purple: #8b5cf6;
+  --accent-indigo: #6366f1;
+  --accent-pink: #ec4899;
+  --muted: #71717a;
+  --success: #22c55e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/*
+ * Utility class for the signature gradient background used on landing page hero,
+ * pricing section headers, and other high-impact areas. The gradient flows from
+ * deep purple to indigo to create depth and visual interest.
+ */
+.gradient-hero-background {
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 25%, #0d1b3e 50%, #1a0a2e 75%, #0a0a1a 100%);
+}
+
+/*
+ * Animated gradient for text — used on headings to create that "premium SaaS" feel.
+ * The animation is subtle (6 seconds) so it draws attention without being distracting.
+ * This technique is used by tools like Vercel, Linear, and Arc browser.
+ */
+.gradient-text-animated {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899, #6366f1, #8b5cf6);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/*
+ * Glow effect for cards on hover — creates a soft purple/indigo glow around
+ * interactive cards. Used on pricing cards and feature cards to invite interaction.
+ * The transition is 300ms for a snappy but not jarring feel.
+ */
+.card-glow-on-hover {
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+.card-glow-on-hover:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.15), 0 0 60px rgba(99, 102, 241, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+/*
+ * Pulse animation for the "Generate" button — draws the user's eye to the
+ * primary action. We use a subtle ring pulse rather than a full button pulse
+ * because it's less distracting while still communicating interactivity.
+ */
+.pulse-ring-animation {
+  animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+}
+
+/*
+ * Shimmer loading effect — used as a placeholder while QR art is being generated.
+ * The generation takes 10-30 seconds, so we need a visually engaging loading state
+ * to keep users engaged and reassure them something is happening.
+ */
+.shimmer-loading-effect {
+  background: linear-gradient(
+    90deg,
+    rgba(139, 92, 246, 0.05) 25%,
+    rgba(139, 92, 246, 0.15) 50%,
+    rgba(139, 92, 246, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
