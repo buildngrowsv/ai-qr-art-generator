@@ -49,6 +49,20 @@ const CALL_TO_ACTION_TEXT_BY_TIER_ID: Record<string, string> = {
  *
  * @param tier - The pricing tier that was clicked
  */
+/**
+ * Resolves optional Stripe Payment Link URLs (hosted checkout, no API secret needed on client).
+ * Coordinators can set these on Vercel when Checkout Session API is not wired yet.
+ */
+function resolveStripePaymentLinkForTier(tierId: string): string | null {
+  if (tierId === "pro") {
+    return process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_PRO?.trim() || null;
+  }
+  if (tierId === "business") {
+    return process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_BUSINESS?.trim() || null;
+  }
+  return null;
+}
+
 async function handlePricingTierCtaClick(tier: PricingTierDefinition): Promise<void> {
   /*
    * Free tier — just go to the dashboard, no payment needed.
@@ -61,18 +75,32 @@ async function handlePricingTierCtaClick(tier: PricingTierDefinition): Promise<v
   }
 
   /*
+   * Paid tiers — prefer Payment Link when configured (matches other clone SKUs:
+   * buy.stripe.com links work without STRIPE_SECRET_KEY on the server).
+   */
+  const paymentLinkUrl = resolveStripePaymentLinkForTier(tier.tierId);
+  if (paymentLinkUrl) {
+    window.open(paymentLinkUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  const priceId = tier.stripePriceId;
+  if (!priceId || !priceId.startsWith("price_")) {
+    alert(
+      "Billing is not fully configured for this deployment yet. Set NEXT_PUBLIC_STRIPE_PRICE_ID_* or Payment Link env vars on Vercel."
+    );
+    return;
+  }
+
+  /*
    * Paid tiers — create a Stripe Checkout session via our API.
-   * The API returns a checkout URL that we redirect to.
-   *
-   * This follows Stripe's recommended "redirect to Checkout" pattern.
-   * We pass the priceId so the API knows which product/price to use.
    */
   try {
     const checkoutResponse = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        priceId: tier.stripePriceId,
+        priceId,
       }),
     });
 
@@ -82,7 +110,10 @@ async function handlePricingTierCtaClick(tier: PricingTierDefinition): Promise<v
       window.location.href = checkoutData.checkoutUrl;
     } else {
       console.error("No checkout URL returned from API:", checkoutData);
-      alert("Unable to start checkout. Please try again.");
+      alert(
+        checkoutData.error ||
+          "Unable to start checkout. Confirm STRIPE_SECRET_KEY and price IDs on Vercel."
+      );
     }
   } catch (error) {
     console.error("Checkout initiation failed:", error);

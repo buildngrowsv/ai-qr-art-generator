@@ -24,6 +24,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import type Stripe from "stripe";
 import getStripeServerSideClient from "@/lib/StripeClientInitializer";
 
 /**
@@ -64,6 +65,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    /*
+     * Reject placeholder / garbage IDs early so Stripe does not return opaque 404s
+     * and the user sees a clear configuration error instead of a blank failure.
+     */
+    if (!priceId.startsWith("price_")) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid Stripe price id. Set NEXT_PUBLIC_STRIPE_PRICE_ID_PRO / BUSINESS on Vercel.",
+        },
+        { status: 400 }
+      );
+    }
+
+    let stripeClient: Stripe;
+    try {
+      stripeClient = getStripeServerSideClient();
+    } catch (configError) {
+      console.error("[/api/stripe/checkout] Stripe not configured:", configError);
+      return NextResponse.json(
+        {
+          error:
+            "Payments are not configured (missing STRIPE_SECRET_KEY). Use Payment Links or add secrets on Vercel.",
+          configured: false,
+        },
+        { status: 503 }
+      );
+    }
+
     /**
      * Determine the base URL for redirect URLs.
      * In development, this is http://localhost:4827.
@@ -90,7 +120,7 @@ export async function POST(request: NextRequest) {
      * success page (not implemented in v1 but ready for it).
      */
     const stripeCheckoutSession =
-      await getStripeServerSideClient().checkout.sessions.create({
+      await stripeClient.checkout.sessions.create({
         mode: "subscription",
         payment_method_types: ["card"],
         line_items: [

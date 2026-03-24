@@ -95,10 +95,12 @@ export const ALL_PRICING_TIERS: readonly PricingTierDefinition[] = [
       "Email support",
     ],
     /*
-     * PLACEHOLDER — replace with real Stripe Price ID from Dashboard.
-     * Create a recurring monthly product called "QR Art Pro" at $9/month.
+     * Real Price ID from Stripe Dashboard (recurring monthly "QR Art Pro").
+     * Set NEXT_PUBLIC_STRIPE_PRICE_ID_PRO on Vercel so the client can POST it
+     * to /api/stripe/checkout. Without it, use NEXT_PUBLIC_STRIPE_PAYMENT_LINK_PRO
+     * in PricingTierCards for hosted Payment Links instead.
      */
-    stripePriceId: "price_pro_placeholder",
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO?.trim() || null,
     isRecommendedTier: true,
     tagline: "Most popular",
   },
@@ -120,10 +122,9 @@ export const ALL_PRICING_TIERS: readonly PricingTierDefinition[] = [
       "Commercial license",
     ],
     /*
-     * PLACEHOLDER — replace with real Stripe Price ID from Dashboard.
-     * Create a recurring monthly product called "QR Art Business" at $29/month.
+     * Real Price ID for Business tier, or Payment Link env in the UI layer.
      */
-    stripePriceId: "price_business_placeholder",
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BUSINESS?.trim() || null,
     isRecommendedTier: false,
     tagline: "For teams & agencies",
   },
