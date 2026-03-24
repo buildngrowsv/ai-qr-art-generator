@@ -69,6 +69,8 @@ export const metadata: Metadata = {
     description:
       "Generate beautiful, artistic QR codes powered by AI. Free to try.",
     type: "website",
+    locale: "en_US",
+    url: "https://ai-qr-art-generator.vercel.app",
     siteName: "QR Art AI",
   },
   twitter: {
@@ -76,6 +78,10 @@ export const metadata: Metadata = {
     title: "QR Art AI — Transform URLs into Stunning QR Code Art",
     description:
       "Generate beautiful, artistic QR codes powered by AI. Free to try.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
