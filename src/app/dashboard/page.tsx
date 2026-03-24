@@ -1,298 +1,218 @@
 /**
- * DASHBOARD / GENERATE PAGE — QR Art Studio
+ * dashboard/page.tsx — QR Art Generation Dashboard
  *
- * This is the core product page where users actually generate QR art.
- * It needs to be dead simple: enter URL → pick style → click generate → see result.
+ * PRODUCT CONTEXT: This is the CORE of the product — where users actually generate
+ * QR art. The page is designed as a two-column layout:
+ *   - Left column: Input controls (URL, style presets, custom prompt, generate button)
+ *   - Right column: Preview area (shows generated image or loading/empty state)
+ *
+ * USER FLOW:
+ *   1. User enters a URL they want to encode
+ *   2. User selects a style preset OR types a custom prompt
+ *   3. User clicks "Generate QR Art"
+ *   4. Loading spinner shows while fal.ai processes (10-30 seconds)
+ *   5. Generated image appears in the preview area
+ *   6. User can download the image or generate again
  *
  * DESIGN DECISIONS:
- * - Two-column layout: left panel for controls, right panel for preview
- * - Style selector uses a grid of style presets (not a dropdown) because
- *   visual selection is critical for a creative tool — users need to SEE
- *   the style before they pick it
- * - The generate button is large and prominent with a gradient that matches
- *   the brand
- * - Results show in a large preview area with download button
- * - Rate limit display shows remaining free generations (builds urgency to upgrade)
- *
- * TECHNICAL NOTES:
- * - Calls /api/generate which proxies to fal.ai ControlNet QR model
- * - Uses client-side state management (useState) — no need for global state
- *   since this page is self-contained
- * - The style presets are hardcoded strings that map to specific prompts
- *   sent to the diffusion model. We tested these prompts to find the ones
- *   that produce the best-looking results while maintaining QR scannability.
- *
- * Created: 2026-03-24 by Coordinator 26 (BridgeSwarm pane1774)
+ *   - Two-column layout maximizes screen real estate and keeps inputs near the preview
+ *   - Style presets are prominently displayed because they produce better results
+ *   - The remaining generations counter creates natural upgrade pressure
+ *   - Mobile: stacks to single column with inputs on top
  */
 
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useCallback } from "react";
+import ArtStylePresetSelector from "@/components/ArtStylePresetSelector";
+import type { ArtStylePresetDefinition } from "@/components/ArtStylePresetSelector";
+import QrArtPreviewDisplay from "@/components/QrArtPreviewDisplay";
+import GenerateQrArtButton from "@/components/GenerateQrArtButton";
 
-/**
- * ART_STYLE_PRESETS — Curated list of style prompts that work well with
- * ControlNet QR Code generation. Each style has been tested to produce
- * visually appealing results while maintaining QR code scannability.
- *
- * WHY THESE SPECIFIC STYLES:
- * - Watercolor: Soft, organic feel — popular for wedding/event QR codes
- * - Cyberpunk: Neon colors pop and are eye-catching for tech/gaming
- * - Japanese: Wave/cherry blossom aesthetic — strong demand in Asian markets
- * - Minimal: Clean, professional — best for business cards
- * - Steampunk: Unique mechanical aesthetic — differentiator from competitors
- * - Galaxy: Space theme — popular for social media sharing (viral potential)
- */
-const ART_STYLE_PRESETS = [
-  { styleId: "watercolor", styleLabel: "Watercolor", stylePromptSuffix: "watercolor painting, soft brushstrokes, flowing colors, artistic" },
-  { styleId: "cyberpunk", styleLabel: "Cyberpunk", stylePromptSuffix: "cyberpunk neon city, glowing lights, futuristic, dark background with neon colors" },
-  { styleId: "japanese", styleLabel: "Japanese Art", stylePromptSuffix: "japanese ukiyo-e style, great wave, cherry blossoms, traditional japanese art" },
-  { styleId: "minimal", styleLabel: "Minimal", stylePromptSuffix: "minimalist geometric design, clean lines, monochrome with accent color" },
-  { styleId: "steampunk", styleLabel: "Steampunk", stylePromptSuffix: "steampunk mechanical gears, brass and copper, victorian industrial" },
-  { styleId: "galaxy", styleLabel: "Galaxy", stylePromptSuffix: "cosmic galaxy nebula, stars, deep space, purple and blue cosmic clouds" },
-  { styleId: "forest", styleLabel: "Enchanted Forest", stylePromptSuffix: "enchanted forest, magical trees, fireflies, mystical atmosphere, green" },
-  { styleId: "ocean", styleLabel: "Ocean Waves", stylePromptSuffix: "ocean waves crashing, deep blue sea, foam, dynamic water movement" },
-  { styleId: "abstract", styleLabel: "Abstract", stylePromptSuffix: "abstract art, bold geometric shapes, vibrant colors, modern art museum" },
-  { styleId: "retro", styleLabel: "Retro 80s", stylePromptSuffix: "retro 80s synthwave, sunset gradient, palm trees, vaporwave aesthetic" },
-  { styleId: "floral", styleLabel: "Floral", stylePromptSuffix: "beautiful flowers, roses, botanical illustration, garden, colorful petals" },
-  { styleId: "fire", styleLabel: "Fire & Flame", stylePromptSuffix: "flames and fire, ember particles, warm orange and red, dynamic energy" },
-];
-
-/**
- * QrArtGenerationDashboardPage — Main generation interface.
- *
- * This is a client component because it manages interactive state:
- * - URL input
- * - Selected style
- * - Custom prompt (optional override)
- * - Generation loading state
- * - Generated image result
- *
- * The component does NOT handle auth or billing — that's handled by
- * the /api/generate endpoint which checks rate limits server-side.
- */
 export default function QrArtGenerationDashboardPage() {
+  /**
+   * STATE MANAGEMENT — individual useState hooks for independent state pieces.
+   * Simpler than useReducer for this level of complexity.
+   */
   const [targetUrlInput, setTargetUrlInput] = useState("");
-  const [selectedStylePresetId, setSelectedStylePresetId] = useState("watercolor");
-  const [customPromptOverride, setCustomPromptOverride] = useState("");
+  const [stylePromptInput, setStylePromptInput] = useState("");
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
-  const [isGenerationInProgress, setIsGenerationInProgress] = useState(false);
+  const [isCurrentlyGenerating, setIsCurrentlyGenerating] = useState(false);
   const [generationErrorMessage, setGenerationErrorMessage] = useState<string | null>(null);
-  const [remainingFreeGenerationsCount, setRemainingFreeGenerationsCount] = useState(3);
+  const [remainingDailyGenerations, setRemainingDailyGenerations] = useState<number | null>(null);
 
   /**
-   * handleGenerateQrArt — Calls the /api/generate endpoint with the URL
-   * and style prompt. The API handles the actual fal.ai call and rate limiting.
-   *
-   * Error handling: We show user-friendly messages for common errors:
-   * - Rate limit exceeded → "Upgrade to Pro" CTA
-   * - Invalid URL → "Please enter a valid URL"
-   * - API error → generic retry message
+   * When a style preset is selected, update both the preset highlight and the prompt field.
    */
-  async function handleGenerateQrArt() {
+  const handleStylePresetSelection = useCallback(
+    (preset: ArtStylePresetDefinition) => {
+      setSelectedPresetId(preset.presetId);
+      setStylePromptInput(preset.promptTemplate);
+    },
+    []
+  );
+
+  /**
+   * When user manually edits the prompt, deselect any preset since
+   * the prompt no longer matches a preset exactly.
+   */
+  const handleStylePromptManualEdit = useCallback(
+    (newPromptValue: string) => {
+      setStylePromptInput(newPromptValue);
+      setSelectedPresetId(null);
+    },
+    []
+  );
+
+  /**
+   * Main generation handler — calls /api/generate which handles rate limiting + fal.ai.
+   *
+   * We call our API route (not fal.ai directly) because:
+   *   - FAL_KEY stays server-side (security)
+   *   - Server-side rate limiting can't be bypassed by client
+   *   - Server-side logging helps debug and track usage
+   */
+  const handleGenerateQrArtClick = useCallback(async () => {
     if (!targetUrlInput.trim()) {
-      setGenerationErrorMessage("Please enter a URL to generate a QR code for.");
+      setGenerationErrorMessage("Please enter a URL to encode in the QR code.");
+      return;
+    }
+    if (!stylePromptInput.trim()) {
+      setGenerationErrorMessage("Please choose a style or enter a custom prompt.");
       return;
     }
 
-    setIsGenerationInProgress(true);
+    setIsCurrentlyGenerating(true);
     setGenerationErrorMessage(null);
     setGeneratedImageUrl(null);
 
     try {
-      const selectedPreset = ART_STYLE_PRESETS.find(
-        (style) => style.styleId === selectedStylePresetId
-      );
-
-      const stylePromptToUse = customPromptOverride.trim()
-        ? customPromptOverride
-        : selectedPreset?.stylePromptSuffix || "beautiful artistic design";
-
-      const generationResponse = await fetch("/api/generate", {
+      const generateApiResponse = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          targetUrl: targetUrlInput,
-          stylePrompt: stylePromptToUse,
+          targetUrl: targetUrlInput.trim(),
+          stylePrompt: stylePromptInput.trim(),
         }),
       });
 
-      const generationResult = await generationResponse.json();
+      const generateApiData = await generateApiResponse.json();
 
-      if (!generationResponse.ok) {
-        if (generationResponse.status === 429) {
+      if (!generateApiResponse.ok) {
+        if (generateApiResponse.status === 429) {
           setGenerationErrorMessage(
-            "Daily free limit reached. Upgrade to Pro for 50 generations/day."
+            "You've reached your daily generation limit. Upgrade to Pro for 50/day or Business for unlimited."
           );
+          setRemainingDailyGenerations(0);
         } else {
           setGenerationErrorMessage(
-            generationResult.error || "Generation failed. Please try again."
+            generateApiData.error || "Something went wrong. Please try again."
           );
         }
         return;
       }
 
-      setGeneratedImageUrl(generationResult.imageUrl);
-      setRemainingFreeGenerationsCount((prev) => Math.max(0, prev - 1));
-    } catch (fetchError) {
+      setGeneratedImageUrl(generateApiData.generatedImageUrl);
+      setRemainingDailyGenerations(generateApiData.remainingGenerations);
+    } catch (networkError) {
+      console.error("Network error during QR art generation:", networkError);
       setGenerationErrorMessage(
-        "Network error. Please check your connection and try again."
+        "Network error — please check your internet connection and try again."
       );
     } finally {
-      setIsGenerationInProgress(false);
+      setIsCurrentlyGenerating(false);
     }
-  }
+  }, [targetUrlInput, stylePromptInput]);
+
+  const isGenerateButtonEnabled =
+    targetUrlInput.trim().length > 0 && stylePromptInput.trim().length > 0;
 
   return (
-    <main className="min-h-screen bg-zinc-950">
-      {/* Top nav bar — minimal, just logo + back to home + upgrade CTA */}
-      <nav className="flex items-center justify-between border-b border-white/5 px-6 py-4">
-        <Link
-          href="/"
-          className="text-lg font-semibold text-white hover:text-purple-300 transition-colors"
-        >
-          QR Art Studio
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-400">
-            {remainingFreeGenerationsCount} free generations left today
-          </span>
-          <Link
-            href="/pricing"
-            className="rounded-full bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-purple-500/25"
-          >
-            Upgrade to Pro
-          </Link>
-        </div>
-      </nav>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {/* Page header */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">
+          Generate <span className="gradient-text-animated">QR Art</span>
+        </h1>
+        <p className="mt-2 text-zinc-400">
+          Enter a URL, choose a style, and create beautiful QR code art in seconds.
+        </p>
+      </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* LEFT PANEL — Controls */}
-          <div className="space-y-8">
-            {/* URL Input */}
-            <div>
-              <label
-                htmlFor="target-url-input"
-                className="mb-2 block text-sm font-medium text-zinc-300"
-              >
-                Enter URL for QR Code
-              </label>
-              <input
-                id="target-url-input"
-                type="url"
-                placeholder="https://your-website.com"
-                value={targetUrlInput}
-                onChange={(e) => setTargetUrlInput(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-              />
-            </div>
-
-            {/* Style Selector Grid */}
-            <div>
-              <label className="mb-3 block text-sm font-medium text-zinc-300">
-                Choose Art Style
-              </label>
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {ART_STYLE_PRESETS.map((style) => (
-                  <button
-                    key={style.styleId}
-                    onClick={() => setSelectedStylePresetId(style.styleId)}
-                    className={`rounded-xl border p-3 text-center text-sm font-medium transition-all ${
-                      selectedStylePresetId === style.styleId
-                        ? "border-purple-500 bg-purple-500/20 text-purple-300"
-                        : "border-white/10 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10"
-                    }`}
-                  >
-                    {style.styleLabel}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom Prompt Override — for power users who want fine control */}
-            <div>
-              <label
-                htmlFor="custom-prompt-override"
-                className="mb-2 block text-sm font-medium text-zinc-300"
-              >
-                Custom Prompt (optional — overrides style selection)
-              </label>
-              <textarea
-                id="custom-prompt-override"
-                placeholder="Describe your ideal QR art style..."
-                value={customPromptOverride}
-                onChange={(e) => setCustomPromptOverride(e.target.value)}
-                rows={3}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-              />
-            </div>
-
-            {/* Generate Button — large and prominent */}
-            <button
-              onClick={handleGenerateQrArt}
-              disabled={isGenerationInProgress}
-              className={`w-full rounded-xl py-4 text-lg font-semibold text-white transition-all ${
-                isGenerationInProgress
-                  ? "cursor-not-allowed bg-zinc-700"
-                  : "bg-gradient-to-r from-purple-500 to-blue-500 hover:shadow-lg hover:shadow-purple-500/25 hover:scale-[1.02]"
-              }`}
+      {/*
+       * Two-column layout — inputs on left, preview on right.
+       * Stacks on mobile with inputs on top.
+       */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        {/* LEFT COLUMN: Input controls */}
+        <div className="space-y-6">
+          {/* URL Input */}
+          <div className="space-y-2">
+            <label
+              htmlFor="target-url-input"
+              className="block text-sm font-medium text-zinc-300"
             >
-              {isGenerationInProgress ? (
-                <span className="flex items-center justify-center gap-3">
-                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Generating your QR art...
-                </span>
-              ) : (
-                "Generate QR Art"
-              )}
-            </button>
-
-            {/* Error Message */}
-            {generationErrorMessage && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-                {generationErrorMessage}
-              </div>
-            )}
+              URL to Encode
+            </label>
+            <input
+              id="target-url-input"
+              type="url"
+              value={targetUrlInput}
+              onChange={(e) => setTargetUrlInput(e.target.value)}
+              placeholder="https://yourwebsite.com"
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+            />
+            <p className="text-xs text-zinc-600">
+              This URL will be encoded in the QR code. Scanners will navigate here.
+            </p>
           </div>
 
-          {/* RIGHT PANEL — Preview / Result */}
-          <div className="flex flex-col items-center justify-center">
-            {generatedImageUrl ? (
-              <div className="space-y-4 text-center">
-                <div className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-purple-500/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={generatedImageUrl}
-                    alt="Generated QR Art"
-                    className="h-auto w-full max-w-md"
-                  />
-                </div>
-                <a
-                  href={generatedImageUrl}
-                  download="qr-art-studio.png"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
-                >
-                  📥 Download QR Art
-                </a>
-              </div>
-            ) : (
-              /* Placeholder when no image has been generated yet */
-              <div className="flex h-96 w-full max-w-md items-center justify-center rounded-2xl border-2 border-dashed border-white/10 bg-white/5">
-                <div className="text-center">
-                  <p className="text-6xl">🎨</p>
-                  <p className="mt-4 text-lg font-medium text-zinc-400">
-                    Your QR art will appear here
-                  </p>
-                  <p className="mt-2 text-sm text-zinc-500">
-                    Enter a URL and click Generate
-                  </p>
-                </div>
-              </div>
-            )}
+          {/* Style preset selector */}
+          <ArtStylePresetSelector
+            selectedPresetId={selectedPresetId}
+            onPresetSelected={handleStylePresetSelection}
+          />
+
+          {/* Custom prompt textarea */}
+          <div className="space-y-2">
+            <label
+              htmlFor="style-prompt-textarea"
+              className="block text-sm font-medium text-zinc-300"
+            >
+              Style Prompt
+            </label>
+            <textarea
+              id="style-prompt-textarea"
+              value={stylePromptInput}
+              onChange={(e) => handleStylePromptManualEdit(e.target.value)}
+              placeholder="Describe the visual style you want, e.g., 'futuristic neon city with glowing lights and rain reflections'"
+              rows={4}
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all resize-none"
+            />
+            <p className="text-xs text-zinc-600">
+              Choose a preset above or write your own. More descriptive prompts produce better results.
+            </p>
           </div>
+
+          {/* Generate button */}
+          <GenerateQrArtButton
+            isEnabled={isGenerateButtonEnabled}
+            isCurrentlyGenerating={isCurrentlyGenerating}
+            remainingDailyGenerations={remainingDailyGenerations}
+            onGenerateClick={handleGenerateQrArtClick}
+          />
+        </div>
+
+        {/* RIGHT COLUMN: Preview area */}
+        <div className="flex items-start justify-center lg:pt-8">
+          <QrArtPreviewDisplay
+            generatedImageUrl={generatedImageUrl}
+            isCurrentlyGenerating={isCurrentlyGenerating}
+            generationErrorMessage={generationErrorMessage}
+          />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
