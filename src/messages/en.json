@@ -1,6 +1,299 @@
 {
   "Meta": {
     "title": "QR Art AI — Transform URLs into Stunning QR Code Art",
-    "description": "Generate beautiful, artistic QR codes powered by AI. Turn any URL into scannable art. Free to try, instant results. Perfect for marketing, events, and branding."
+    "description": "Generate beautiful, artistic QR codes powered by AI. Turn any URL into scannable art. Free to try, instant results. Perfect for marketing, events, and branding.",
+    "keywordList": [
+      "QR code art",
+      "AI QR code generator",
+      "artistic QR codes",
+      "QR code design",
+      "beautiful QR codes",
+      "scannable QR art"
+    ]
+  },
+  "PricingMeta": {
+    "title": "Pricing — QR Art AI | Plans & FAQ",
+    "description": "Compare Free, Pro, and Business plans for AI QR art. Start free with daily generations; upgrade for HD exports, SVG, and higher limits."
+  },
+  "DashboardMeta": {
+    "title": "Generate QR Art — Dashboard | QR Art AI",
+    "description": "Create scannable QR code art from any URL. Pick a style preset or custom prompt and download your result in seconds."
+  },
+  "JsonLd": {
+    "softwareName": "AI QR Art Generator",
+    "softwareDescription": "Transform any URL into beautiful artistic QR codes. Choose from dozens of styles — watercolor, geometric, circuit board, floral, and more. All QR codes are guaranteed to scan.",
+    "softwareFeatures": [
+      "Artistic QR code generation",
+      "Multiple visual styles",
+      "Guaranteed scannable output",
+      "High-resolution download"
+    ],
+    "faq": [
+      {
+        "question": "Do artistic QR codes still scan?",
+        "answer": "Yes! Our AI generates beautiful QR code art while preserving error-correction data. All codes are tested to scan correctly."
+      },
+      {
+        "question": "Is the QR art generator free?",
+        "answer": "Yes! Generate up to 3 artistic QR codes for free daily. Upgrade for unlimited generations."
+      },
+      {
+        "question": "What styles are available?",
+        "answer": "Dozens of styles including watercolor, geometric, circuit board, floral, neon, minimalist, and more."
+      }
+    ]
+  },
+  "Nav": {
+    "dashboard": "Dashboard",
+    "pricing": "Pricing",
+    "startCreating": "Start Creating",
+    "create": "Create",
+    "brandBefore": "QR",
+    "brandAccent": "Art",
+    "brandAfter": "AI"
+  },
+  "Footer": {
+    "tagline": "Transform any URL into stunning QR code art using AI. Beautiful, scannable, and unique.",
+    "product": "Product",
+    "generate": "Generate QR Art",
+    "pricing": "Pricing",
+    "legal": "Legal",
+    "privacy": "Privacy Policy (coming soon)",
+    "terms": "Terms of Service (coming soon)",
+    "copyright": "QR Art AI. All rights reserved."
+  },
+  "Landing": {
+    "heroBadge": "AI-Powered QR Art Generator",
+    "heroTitleBefore": "Transform Any URL Into",
+    "heroTitleAccent": "Stunning QR Code Art",
+    "heroSubtitle": "Create beautiful, scannable QR codes powered by AI. Choose from dozens of art styles, customize with prompts, and download in seconds. Every code guaranteed scannable.",
+    "tryFree": "Try Free — No Sign Up",
+    "viewPricing": "View Pricing",
+    "heroStats": [
+      { "value": "100%", "label": "Scannable" },
+      { "value": "<30s", "label": "Generation Time" },
+      { "value": "50+", "label": "Art Styles" },
+      { "value": "4K", "label": "Resolution" }
+    ],
+    "styleExamples": [
+      { "styleLabel": "Cyberpunk", "gradientColors": "from-violet-600 to-cyan-500" },
+      { "styleLabel": "Japanese Garden", "gradientColors": "from-pink-400 to-green-400" },
+      { "styleLabel": "Ocean Waves", "gradientColors": "from-blue-600 to-amber-400" },
+      { "styleLabel": "Galaxy", "gradientColors": "from-purple-800 to-pink-500" }
+    ],
+    "featuresTitleBefore": "Why Choose",
+    "featuresTitleAccent": "QR Art AI",
+    "featuresSubtitle": "The only QR generator that makes art — not just codes.",
+    "features": [
+      {
+        "title": "Always Scannable",
+        "description": "Our AI ensures every QR code art piece is fully functional. Beautiful doesn't mean broken — every creation scans perfectly with any smartphone camera.",
+        "iconPath": "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+      },
+      {
+        "title": "Generate in Seconds",
+        "description": "No design skills needed. Enter a URL, pick a style, and get stunning QR art in 10-20 seconds. What used to take hours in Photoshop now takes seconds.",
+        "iconPath": "M13 10V3L4 14h7v7l9-11h-7z"
+      },
+      {
+        "title": "Unlimited Creativity",
+        "description": "Choose from curated style presets or write custom prompts. Cyberpunk, watercolor, galaxy — if you can describe it, we can create it.",
+        "iconPath": "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+      },
+      {
+        "title": "High Resolution",
+        "description": "Download in up to 4K resolution. Perfect for print materials, posters, business cards, and merchandise.",
+        "iconPath": "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      },
+      {
+        "title": "Custom Branding",
+        "description": "Match your brand aesthetic. Use custom prompts to incorporate your brand colors, themes, and visual identity into every QR code.",
+        "iconPath": "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+      },
+      {
+        "title": "Unlimited Variations",
+        "description": "Not happy with the first result? Regenerate with one click. Each generation creates a unique variation of your QR art.",
+        "iconPath": "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+      }
+    ],
+    "howTitleBefore": "Three Steps to",
+    "howTitleAccent": "Beautiful QR Art",
+    "howSubtitle": "From URL to artwork in under a minute",
+    "steps": [
+      {
+        "stepNumber": "01",
+        "title": "Enter Your URL",
+        "description": "Paste any URL — your website, social profile, portfolio, or any link you want to share."
+      },
+      {
+        "stepNumber": "02",
+        "title": "Choose a Style",
+        "description": "Pick from curated presets like Cyberpunk, Japanese Garden, or Galaxy — or write your own creative prompt."
+      },
+      {
+        "stepNumber": "03",
+        "title": "Download & Share",
+        "description": "Get your AI-generated QR art in seconds. Download as PNG and use it anywhere — print, digital, social media."
+      }
+    ],
+    "useCasesTitleBefore": "Perfect For Every",
+    "useCasesTitleAccent": "Use Case",
+    "useCases": [
+      {
+        "useCase": "Marketing Campaigns",
+        "description": "Stand out in print ads, flyers, and billboards with QR codes people actually want to scan.",
+        "icon": "M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+      },
+      {
+        "useCase": "Business Cards",
+        "description": "Replace boring QR codes with artistic ones that match your brand and make a lasting impression.",
+        "icon": "M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+      },
+      {
+        "useCase": "Events & Conferences",
+        "description": "Create memorable event badges, posters, and materials with scannable art that drives engagement.",
+        "icon": "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      },
+      {
+        "useCase": "Social Media",
+        "description": "Share beautiful QR art that links to your profiles, driving followers from any platform.",
+        "icon": "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+      }
+    ],
+    "pricingSectionTitleBefore": "Simple,",
+    "pricingSectionTitleAccent": "Transparent",
+    "pricingSectionTitleAfter": "Pricing",
+    "pricingSectionSubtitle": "Start free, upgrade when you need more. No hidden fees.",
+    "finalTitleBefore": "Ready to Create",
+    "finalTitleAccent": "Something Beautiful?",
+    "finalBody": "Join creators, marketers, and businesses using AI to transform ordinary QR codes into works of art.",
+    "finalCta": "Start Creating — It's Free"
+  },
+  "PricingPage": {
+    "titleBefore": "Choose Your",
+    "titleAccent": "Perfect Plan",
+    "subtitle": "Start free with 3 generations per day. Upgrade anytime for more generations, higher resolution, and premium features.",
+    "faqHeading": "Frequently Asked Questions",
+    "faqItems": [
+      {
+        "question": "Can I try it before paying?",
+        "answer": "Yes! The Free tier gives you 3 QR art generations per day with no sign-up or credit card required. Try it out and upgrade when you need more."
+      },
+      {
+        "question": "Are the generated QR codes really scannable?",
+        "answer": "Absolutely. Our AI is specifically tuned to maintain QR code scannability while adding artistic elements. Every generated code is designed to scan with any standard smartphone camera."
+      },
+      {
+        "question": "Can I cancel my subscription anytime?",
+        "answer": "Yes. You can cancel your Pro or Business subscription at any time through the customer portal. Your plan will remain active until the end of your billing period."
+      },
+      {
+        "question": "What image formats can I download?",
+        "answer": "Free and Pro users can download PNG files. Business users get additional format options including SVG and PDF, perfect for print production."
+      },
+      {
+        "question": "Do I own the generated QR art?",
+        "answer": "Yes. All QR art you generate is yours to use commercially. Business plan users get an explicit commercial license for agency and client work."
+      }
+    ]
+  },
+  "PricingTiers": {
+    "free": {
+      "displayName": "Free",
+      "displayPrice": "Free",
+      "limitDescription": "3 generations per day",
+      "tagline": "Try it out",
+      "features": [
+        "3 QR art generations per day",
+        "Standard quality (512x512)",
+        "Basic style presets",
+        "PNG download",
+        "Community support"
+      ],
+      "cta": "Get Started Free"
+    },
+    "pro": {
+      "displayName": "Pro",
+      "displayPrice": "$9",
+      "limitDescription": "50 generations per day",
+      "tagline": "Most popular",
+      "features": [
+        "50 QR art generations per day",
+        "HD quality (1024x1024)",
+        "All style presets + custom prompts",
+        "PNG & SVG download",
+        "Priority generation queue",
+        "Email support"
+      ],
+      "cta": "Upgrade to Pro"
+    },
+    "business": {
+      "displayName": "Business",
+      "displayPrice": "$29",
+      "limitDescription": "Unlimited generations",
+      "tagline": "For teams & agencies",
+      "features": [
+        "Unlimited QR art generations",
+        "Ultra HD quality (2048x2048)",
+        "All style presets + custom prompts",
+        "PNG, SVG & PDF download",
+        "Priority generation queue",
+        "API access (coming soon)",
+        "Dedicated support",
+        "Commercial license"
+      ],
+      "cta": "Go Business"
+    }
+  },
+  "PricingCards": {
+    "perMonth": "/mo",
+    "billingNotConfigured": "Billing is not fully configured for this deployment yet. Set NEXT_PUBLIC_STRIPE_PRICE_ID_* or Payment Link env vars on Vercel.",
+    "checkoutFailed": "Unable to start checkout. Confirm STRIPE_SECRET_KEY and price IDs on Vercel.",
+    "checkoutGeneric": "Unable to start checkout. Please try again.",
+    "ctaFallback": "Get Started"
+  },
+  "StylePresets": {
+    "sectionLabel": "Style Presets",
+    "sectionHint": "Choose a preset or write your own custom prompt below",
+    "cyberpunk-neon": "Cyberpunk Neon",
+    "japanese-garden": "Japanese Garden",
+    "ocean-waves": "Ocean Waves",
+    "abstract-geometric": "Abstract Geometric",
+    "watercolor-flowers": "Watercolor Flowers",
+    "steampunk-gears": "Steampunk",
+    "galaxy-nebula": "Galaxy Nebula",
+    "forest-path": "Enchanted Forest"
+  },
+  "Dashboard": {
+    "titleBefore": "Generate",
+    "titleAccent": "QR Art",
+    "subtitle": "Enter a URL, choose a style, and create beautiful QR code art in seconds.",
+    "urlLabel": "URL to Encode",
+    "urlPlaceholder": "https://yourwebsite.com",
+    "urlHint": "This URL will be encoded in the QR code. Scanners will navigate here.",
+    "stylePromptLabel": "Style Prompt",
+    "stylePromptPlaceholder": "Describe the visual style you want, e.g., 'futuristic neon city with glowing lights and rain reflections'",
+    "stylePromptHint": "Choose a preset above or write your own. More descriptive prompts produce better results.",
+    "errorUrlRequired": "Please enter a URL to encode in the QR code.",
+    "errorPromptRequired": "Please choose a style or enter a custom prompt.",
+    "errorRateLimit": "You've reached your daily generation limit. Upgrade to Pro for 50/day or Business for unlimited.",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "errorNetwork": "Network error — please check your internet connection and try again."
+  },
+  "GenerateButton": {
+    "loading": "Generating your QR art...",
+    "upgrade": "Upgrade to Generate More",
+    "cta": "Generate QR Art",
+    "remaining": "{count, plural, one {# generation remaining today} other {# generations remaining today}}",
+    "dailyLimit": "Daily limit reached — upgrade for more"
+  },
+  "Preview": {
+    "loadingTitle": "Generating your QR art...",
+    "loadingHint": "This usually takes 10-20 seconds",
+    "tryAgainHint": "Try again or use a different style prompt",
+    "emptyTitle": "Your QR art will appear here",
+    "emptyHint": "Enter a URL and style, then click Generate",
+    "download": "Download QR Art",
+    "altGenerated": "Generated QR code art — scan with your phone camera to visit the encoded URL"
   }
 }

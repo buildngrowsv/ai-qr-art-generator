@@ -24,12 +24,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import ArtStylePresetSelector from "@/components/ArtStylePresetSelector";
 import type { ArtStylePresetDefinition } from "@/components/ArtStylePresetSelector";
 import QrArtPreviewDisplay from "@/components/QrArtPreviewDisplay";
 import GenerateQrArtButton from "@/components/GenerateQrArtButton";
 
 export default function QrArtGenerationDashboardPage() {
+  const t = useTranslations("Dashboard");
   /**
    * STATE MANAGEMENT — individual useState hooks for independent state pieces.
    * Simpler than useReducer for this level of complexity.
@@ -75,11 +77,11 @@ export default function QrArtGenerationDashboardPage() {
    */
   const handleGenerateQrArtClick = useCallback(async () => {
     if (!targetUrlInput.trim()) {
-      setGenerationErrorMessage("Please enter a URL to encode in the QR code.");
+      setGenerationErrorMessage(t("errorUrlRequired"));
       return;
     }
     if (!stylePromptInput.trim()) {
-      setGenerationErrorMessage("Please choose a style or enter a custom prompt.");
+      setGenerationErrorMessage(t("errorPromptRequired"));
       return;
     }
 
@@ -101,14 +103,10 @@ export default function QrArtGenerationDashboardPage() {
 
       if (!generateApiResponse.ok) {
         if (generateApiResponse.status === 429) {
-          setGenerationErrorMessage(
-            "You've reached your daily generation limit. Upgrade to Pro for 50/day or Business for unlimited."
-          );
+          setGenerationErrorMessage(t("errorRateLimit"));
           setRemainingDailyGenerations(0);
         } else {
-          setGenerationErrorMessage(
-            generateApiData.error || "Something went wrong. Please try again."
-          );
+          setGenerationErrorMessage(generateApiData.error || t("errorGeneric"));
         }
         return;
       }
@@ -117,13 +115,11 @@ export default function QrArtGenerationDashboardPage() {
       setRemainingDailyGenerations(generateApiData.remainingGenerations);
     } catch (networkError) {
       console.error("Network error during QR art generation:", networkError);
-      setGenerationErrorMessage(
-        "Network error — please check your internet connection and try again."
-      );
+      setGenerationErrorMessage(t("errorNetwork"));
     } finally {
       setIsCurrentlyGenerating(false);
     }
-  }, [targetUrlInput, stylePromptInput]);
+  }, [targetUrlInput, stylePromptInput, t]);
 
   const isGenerateButtonEnabled =
     targetUrlInput.trim().length > 0 && stylePromptInput.trim().length > 0;
@@ -133,11 +129,10 @@ export default function QrArtGenerationDashboardPage() {
       {/* Page header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">
-          Generate <span className="gradient-text-animated">QR Art</span>
+          {t("titleBefore")}{" "}
+          <span className="gradient-text-animated">{t("titleAccent")}</span>
         </h1>
-        <p className="mt-2 text-zinc-400">
-          Enter a URL, choose a style, and create beautiful QR code art in seconds.
-        </p>
+        <p className="mt-2 text-zinc-400">{t("subtitle")}</p>
       </div>
 
       {/*
@@ -153,19 +148,17 @@ export default function QrArtGenerationDashboardPage() {
               htmlFor="target-url-input"
               className="block text-sm font-medium text-zinc-300"
             >
-              URL to Encode
+              {t("urlLabel")}
             </label>
             <input
               id="target-url-input"
               type="url"
               value={targetUrlInput}
               onChange={(e) => setTargetUrlInput(e.target.value)}
-              placeholder="https://yourwebsite.com"
+              placeholder={t("urlPlaceholder")}
               className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
             />
-            <p className="text-xs text-zinc-600">
-              This URL will be encoded in the QR code. Scanners will navigate here.
-            </p>
+            <p className="text-xs text-zinc-600">{t("urlHint")}</p>
           </div>
 
           {/* Style preset selector */}
@@ -180,19 +173,17 @@ export default function QrArtGenerationDashboardPage() {
               htmlFor="style-prompt-textarea"
               className="block text-sm font-medium text-zinc-300"
             >
-              Style Prompt
+              {t("stylePromptLabel")}
             </label>
             <textarea
               id="style-prompt-textarea"
               value={stylePromptInput}
               onChange={(e) => handleStylePromptManualEdit(e.target.value)}
-              placeholder="Describe the visual style you want, e.g., 'futuristic neon city with glowing lights and rain reflections'"
+              placeholder={t("stylePromptPlaceholder")}
               rows={4}
               className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.03] text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all resize-none"
             />
-            <p className="text-xs text-zinc-600">
-              Choose a preset above or write your own. More descriptive prompts produce better results.
-            </p>
+            <p className="text-xs text-zinc-600">{t("stylePromptHint")}</p>
           </div>
 
           {/* Generate button */}

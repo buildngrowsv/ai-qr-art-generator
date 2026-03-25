@@ -61,70 +61,9 @@ const geistMono = Geist_Mono({
 
 /**
  * The canonical site URL. Update when a custom domain is configured.
- * Used for canonical, hreflang alternates, and Open Graph URL.
+ * Used for metadataBase in shared layout metadata.
  */
 const siteUrl = "https://ai-qr-art-generator.vercel.app";
-
-/**
- * JSON-LD structured data — SoftwareApplication schema.
- * Added 2026-03-24 by Scout 15 for SEO across all clone apps.
- * QR code generators have strong commercial intent — businesses search
- * for branded QR codes for marketing materials, events, and packaging.
- * The schema is injected inline in <head> so Google can parse it without
- * executing JS (compatible with googlebot's rendering behavior).
- */
-const jsonLdSoftwareApp = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "AI QR Art Generator",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web",
-  "description": "Transform any URL into beautiful artistic QR codes. Choose from dozens of styles — watercolor, geometric, circuit board, floral, and more. All QR codes are guaranteed to scan.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "featureList": [
-    "Artistic QR code generation",
-    "Multiple visual styles",
-    "Guaranteed scannable output",
-    "High-resolution download",
-  ],
-};
-
-/**
- * JSON-LD structured data — FAQPage schema.
- * Answers the three most common questions users have before trying the tool.
- * FAQPage schema can earn Google rich snippets (expanded Q&A in search results),
- * which dramatically increases click-through rate for commercial queries.
- */
-const jsonLdFaq = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Do artistic QR codes still scan?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! Our AI generates beautiful QR code art while preserving error-correction data. All codes are tested to scan correctly.",
-      },
-    },
-    {
-      "@type": "Question",
-      "name": "Is the QR art generator free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! Generate up to 3 artistic QR codes for free daily. Upgrade for unlimited generations.",
-      },
-    },
-    {
-      "@type": "Question",
-      "name": "What styles are available?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Dozens of styles including watercolor, geometric, circuit board, floral, neon, minimalist, and more.",
-      },
-    },
-  ],
-};
 
 /**
  * generateStaticParams — tells Next.js which locale segments to pre-render.
@@ -136,59 +75,16 @@ export function generateStaticParams() {
 }
 
 /**
- * generateMetadata — locale-aware SEO metadata.
+ * generateMetadata — shared defaults only.
  *
- * Uses next-intl's getTranslations to fetch the title and description
- * for the current locale from src/messages/{locale}.json.
- *
- * HREFLANG ALTERNATES: Tells Google which URL serves which language,
- * preventing duplicate content penalties and enabling locale switching
- * in Google Search results. x-default points to the EN canonical URL.
- *
- * OPEN GRAPH LOCALE: Set to "es_ES" for Spanish and "en_US" for English
- * so social sharing cards display in the user's language.
+ * Per-route canonical, title, and Open Graph URLs live on each page's
+ * generateMetadata (home, pricing, dashboard) so /pricing and /es/pricing
+ * do not inherit the homepage canonical incorrectly.
  */
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Meta" });
-
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: t("title"),
-    description: t("description"),
-    keywords: [
-      "QR code art",
-      "AI QR code generator",
-      "artistic QR codes",
-      "QR code design",
-      "beautiful QR codes",
-    ],
-    openGraph: {
-      title: t("title"),
-      description: t("description"),
-      type: "website",
-      // OG locale uses underscore format per Open Graph spec
-      locale: locale === "es" ? "es_ES" : "en_US",
-      url: locale === "es" ? `${siteUrl}/es` : siteUrl,
-      siteName: "QR Art AI",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: t("title"),
-      description: t("description"),
-    },
+    metadataBase: new URL(siteUrl),
     robots: { index: true, follow: true },
-    alternates: {
-      canonical: siteUrl,
-      languages: {
-        en: siteUrl,
-        es: `${siteUrl}/es`,
-        "x-default": siteUrl,
-      },
-    },
   };
 }
 
@@ -226,6 +122,38 @@ export default async function LocaleLayout({
 
   // Load all messages for this locale to pass to the client provider
   const messages = await getMessages();
+
+  /**
+   * JSON-LD is built from the JsonLd message namespace so English and Spanish
+   * structured data match visible copy (Builder 25 — SEO + i18n alignment).
+   */
+  const tJson = await getTranslations({ locale, namespace: "JsonLd" });
+  const softwareFeatures = tJson.raw("softwareFeatures") as string[];
+  const faqPairs = tJson.raw("faq") as { question: string; answer: string }[];
+
+  const jsonLdSoftwareApp = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: tJson("softwareName"),
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description: tJson("softwareDescription"),
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    featureList: softwareFeatures,
+  };
+
+  const jsonLdFaq = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqPairs.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
 
   return (
     <html

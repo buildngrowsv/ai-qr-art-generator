@@ -23,6 +23,8 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
+
 /**
  * A single style preset definition.
  * Each preset contains a full prompt string that produces good QR art results.
@@ -124,14 +126,12 @@ export default function ArtStylePresetSelector({
   selectedPresetId,
   onPresetSelected,
 }: ArtStylePresetSelectorProps) {
+  const t = useTranslations("StylePresets");
+
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-zinc-300">
-        Style Presets
-      </label>
-      <p className="text-xs text-zinc-500">
-        Choose a preset or write your own custom prompt below
-      </p>
+      <label className="block text-sm font-medium text-zinc-300">{t("sectionLabel")}</label>
+      <p className="text-xs text-zinc-500">{t("sectionHint")}</p>
 
       {/*
        * Grid layout — 2 columns on mobile, 4 on desktop.
@@ -161,7 +161,7 @@ export default function ArtStylePresetSelector({
               style={{ background: preset.previewGradient }}
             />
             <span className="text-xs text-zinc-300 text-center leading-tight">
-              {preset.displayLabel}
+              {t(preset.presetId)}
             </span>
           </button>
         ))}

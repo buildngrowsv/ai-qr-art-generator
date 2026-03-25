@@ -1,42 +1,52 @@
 /**
- * =============================================================================
- * QR Art AI — Sitemap Configuration
- * =============================================================================
- *
- * PURPOSE:
- * Generates sitemap.xml for search engine discovery. QR code generators have
- * strong commercial intent — businesses search for branded QR codes for marketing
- * materials, events, and packaging. A sitemap ensures Google indexes both the
- * homepage and the pricing page for maximum SERP coverage.
- *
- * BASE URL: Vercel deployment URL. Update when custom domain is configured.
- *
- * ADDED: 2026-03-24 as part of SEO rollout across all clone apps.
- * =============================================================================
+ * QR Art AI — sitemap with EN/ES alternates (as-needed locale prefix).
+ * Each logical path emits both unprefixed (default EN) and /es/* URLs.
  */
 
 import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://ai-qr-art-generator.vercel.app";
 
-/**
- * This app has both a homepage (tool + landing) and a pricing page, so we
- * include both in the sitemap. The homepage gets priority 1.0 as the main
- * entry point; pricing gets 0.8 as a supporting conversion page.
- */
+type PathSpec = {
+  path: string;
+  priority: number;
+  changeFrequency: "weekly" | "monthly";
+};
+
+const PATH_SPECS: PathSpec[] = [
+  { path: "", priority: 1.0, changeFrequency: "weekly" },
+  { path: "/pricing", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/dashboard", priority: 0.9, changeFrequency: "weekly" },
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: BASE_URL,
+  const entries: MetadataRoute.Sitemap = [];
+
+  for (const spec of PATH_SPECS) {
+    const enUrl = spec.path === "" ? BASE_URL : `${BASE_URL}${spec.path}`;
+    const esUrl = spec.path === "" ? `${BASE_URL}/es` : `${BASE_URL}/es${spec.path}`;
+    const languages = {
+      en: enUrl,
+      es: esUrl,
+      "x-default": enUrl,
+    };
+
+    entries.push({
+      url: enUrl,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/pricing`,
+      changeFrequency: spec.changeFrequency,
+      priority: spec.priority,
+      alternates: { languages },
+    });
+
+    entries.push({
+      url: esUrl,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-  ];
+      changeFrequency: spec.changeFrequency,
+      priority: spec.priority * 0.98,
+      alternates: { languages },
+    });
+  }
+
+  return entries;
 }
