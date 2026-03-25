@@ -117,7 +117,13 @@ export async function POST(request: NextRequest) {
      * Root cause discovered 2026-03-25: the env var was stuck as localhost
      * despite Vercel CLI attempts to update it.
      */
-    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL;
+    /*
+     * WHY .trim(): When env vars are set via `echo "url" | vercel env add`, the echo
+     * command includes a trailing newline (\n). That newline ends up in the env var
+     * value and makes the URL invalid (Stripe rejects urls containing \n with url_invalid).
+     * Always trim env var URLs before use.
+     */
+    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
     const appBaseUrl =
       configuredUrl && configuredUrl.startsWith("https://")
         ? configuredUrl

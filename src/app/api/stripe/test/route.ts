@@ -19,7 +19,7 @@ export async function GET() {
   try {
     // Direct REST call — bypasses the Stripe SDK entirely
     const priceId = "price_1TEUivGsPhSTDD4xrSMxEyHG";
-    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
     const appUrl =
       configuredUrl && configuredUrl.startsWith("https://")
         ? configuredUrl
