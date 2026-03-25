@@ -30,6 +30,7 @@ import {
   getCurrentUserUniqueIdentifier,
 } from "@/lib/AuthenticationPlaceholder";
 import { findPricingTierById } from "@/lib/StripePricingConfiguration";
+import { checkServerSideRateLimit } from "@/lib/server-ip-rate-limiter";
 
 /**
  * POST /api/generate
@@ -48,6 +49,41 @@ import { findPricingTierById } from "@/lib/StripePricingConfiguration";
  */
 export async function POST(request: NextRequest) {
   try {
+    /**
+     * Step 0: Server-side IP rate limit check (MUST be FIRST — before any other logic).
+     *
+     * This is the genuine server-side gate that prevents anonymous abuse of our
+     * paid fal.ai API key. Any bot or script that bypasses the client-side
+     * localStorage modal and calls this endpoint directly will be blocked here.
+     *
+     * We intentionally place this BEFORE JSON parsing so that rate-limited requests
+     * are rejected with minimal server work (no body read, no auth, no fal.ai call).
+     *
+     * See src/lib/server-ip-rate-limiter.ts for full rationale, constants (3 req/IP/24h,
+     * 100 global budget per instance), and Upstash Redis upgrade path.
+     */
+    const rateLimitResult = checkServerSideRateLimit(request);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "Free tier limit reached. Upgrade to Pro for unlimited QR art generations.",
+          upgradeUrl: "/pricing",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(
+              Math.ceil(
+                (rateLimitResult.windowResetTimestampMs - Date.now()) / 1000
+              )
+            ),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
     /**
      * Step 1: Parse and validate the request body.
      * We require both targetUrl and stylePrompt to be non-empty strings.
@@ -113,15 +149,15 @@ export async function POST(request: NextRequest) {
      *   - We don't want to incur fal.ai API costs for rate-limited users
      *   - Rate limit responses should be instant (good UX)
      */
-    const rateLimitResult = checkAndIncrementRateLimit(userIdentifier, dailyLimit);
+    const tierRateLimitResult = checkAndIncrementRateLimit(userIdentifier, dailyLimit);
 
-    if (!rateLimitResult.isAllowed) {
+    if (!tierRateLimitResult.isAllowed) {
       return NextResponse.json(
         {
           error: "Daily generation limit reached. Upgrade your plan for more generations.",
           remainingGenerations: 0,
-          dailyLimit: rateLimitResult.dailyLimit,
-          resetTimestamp: rateLimitResult.windowResetTimestamp,
+          dailyLimit: tierRateLimitResult.dailyLimit,
+          resetTimestamp: tierRateLimitResult.windowResetTimestamp,
         },
         {
           status: 429,
@@ -130,11 +166,11 @@ export async function POST(request: NextRequest) {
              * Standard rate limit headers — helps clients implement backoff
              * and shows rate limit info in browser dev tools.
              */
-            "X-RateLimit-Limit": String(rateLimitResult.dailyLimit),
+            "X-RateLimit-Limit": String(tierRateLimitResult.dailyLimit),
             "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": String(rateLimitResult.windowResetTimestamp),
+            "X-RateLimit-Reset": String(tierRateLimitResult.windowResetTimestamp),
             "Retry-After": String(
-              Math.max(0, rateLimitResult.windowResetTimestamp - Math.floor(Date.now() / 1000))
+              Math.max(0, tierRateLimitResult.windowResetTimestamp - Math.floor(Date.now() / 1000))
             ),
           },
         }
@@ -162,14 +198,14 @@ export async function POST(request: NextRequest) {
         imageWidth: generationResult.imageWidthPixels,
         imageHeight: generationResult.imageHeightPixels,
         seed: generationResult.generationSeed,
-        remainingGenerations: rateLimitResult.remainingGenerations,
+        remainingGenerations: tierRateLimitResult.remainingGenerations,
       },
       {
         status: 200,
         headers: {
-          "X-RateLimit-Limit": String(rateLimitResult.dailyLimit),
-          "X-RateLimit-Remaining": String(rateLimitResult.remainingGenerations),
-          "X-RateLimit-Reset": String(rateLimitResult.windowResetTimestamp),
+          "X-RateLimit-Limit": String(tierRateLimitResult.dailyLimit),
+          "X-RateLimit-Remaining": String(tierRateLimitResult.remainingGenerations),
+          "X-RateLimit-Reset": String(tierRateLimitResult.windowResetTimestamp),
         },
       }
     );
