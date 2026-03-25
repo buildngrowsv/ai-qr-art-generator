@@ -69,11 +69,24 @@ function getStripeServerSideClient(): Stripe {
      * Pinning a mismatched version would cause type errors.
      *
      * NOTE: `typescript: true` was previously here but it is NOT a valid Stripe SDK
-     * option in v16+ (and v20.4.1 which we use). The valid options are apiVersion,
-     * maxNetworkRetries, httpAgent, timeout, host, port, protocol, telemetry, etc.
-     * Having an invalid option would cause the Stripe constructor to throw at runtime,
-     * making all checkout and webhook calls fail with a 500. Removed 2026-03-25.
+     * option in v16+ (and v20.4.1 which we use). Removed 2026-03-25.
+     *
+     * WHY NodeHttpClient: Stripe v20 uses native fetch() by default (FetchHttpClient).
+     * In Vercel serverless functions (Node.js runtime), native fetch can encounter
+     * "connection refused" or retry-exhaustion errors: "An error occurred with our
+     * connection to Stripe. Request was retried 2 times." Switching to NodeHttpClient
+     * (which uses Node.js built-in http/https modules) avoids this issue.
+     *
+     * Root cause discovered 2026-03-25 during pane1774 swarm: direct Stripe REST API
+     * calls with curl worked fine, but the SDK-based route kept failing. The difference
+     * was the HTTP client (fetch vs node https). NodeHttpClient is the battle-tested
+     * approach for serverless Node.js environments.
+     *
+     * maxNetworkRetries: 1 — reduce retries from default 2 to avoid timeout issues.
+     * If Stripe is unreachable, fail fast with a clear error rather than waiting 3x.
      */
+    httpClient: Stripe.createNodeHttpClient(),
+    maxNetworkRetries: 1,
   });
 
   return cachedStripeClient;
