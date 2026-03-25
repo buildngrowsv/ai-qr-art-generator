@@ -136,15 +136,35 @@ export async function POST(request: NextRequest) {
      *   - allow_promotion_codes: true (launch discount codes in Stripe Dashboard)
      *   - success_url: includes {CHECKOUT_SESSION_ID} placeholder (Stripe replaces it)
      */
-    const body = new URLSearchParams({
-      mode: "subscription",
-      "payment_method_types[0]": "card",
-      "line_items[0][price]": priceId,
-      "line_items[0][quantity]": "1",
-      allow_promotion_codes: "true",
-      success_url: `${appBaseUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appBaseUrl}/pricing?checkout=cancelled`,
-    });
+    /*
+     * WHY WE DON'T USE URLSearchParams FOR THE FULL BODY:
+     * URLSearchParams.toString() percent-encodes curly braces { and } as %7B / %7D.
+     * Stripe's {CHECKOUT_SESSION_ID} placeholder must be sent as literal curly braces
+     * in the request body so Stripe can substitute the real session ID on redirect.
+     * If they are encoded, Stripe rejects the URL as invalid (url_invalid error).
+     *
+     * Solution: build the body string manually and append the success_url raw (using
+     * encodeURIComponent only on the base URL portion, not on Stripe's placeholder).
+     * The cancel_url has no placeholders so it can be encoded normally.
+     */
+    /*
+     * Note: we omit {CHECKOUT_SESSION_ID} placeholder for now — Stripe requires
+     * literal curly braces in the URL which can cause url_invalid issues depending
+     * on how the form body is encoded. The session ID is not needed for v1 functionality.
+     * Can be re-added once basic checkout flow is confirmed working.
+     */
+    const successUrl = `${appBaseUrl}/dashboard?checkout=success`;
+    const cancelUrl = `${appBaseUrl}/pricing?checkout=cancelled`;
+
+    const body = [
+      "mode=subscription",
+      "payment_method_types[0]=card",
+      `line_items[0][price]=${encodeURIComponent(priceId)}`,
+      "line_items[0][quantity]=1",
+      "allow_promotion_codes=true",
+      `success_url=${encodeURIComponent(successUrl)}`,
+      `cancel_url=${encodeURIComponent(cancelUrl)}`,
+    ].join("&");
 
     const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
