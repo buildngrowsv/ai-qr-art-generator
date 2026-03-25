@@ -36,6 +36,25 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /**
+   * Tell Next.js webpack bundler NOT to bundle the `stripe` package.
+   * Instead, require it at runtime from node_modules in the serverless function.
+   *
+   * WHY: The Stripe Node.js SDK uses some Node.js built-ins (net, tls, https) that
+   * webpack cannot bundle correctly in Next.js App Router serverless functions. When
+   * webpack tries to bundle Stripe, the resulting bundle either throws at runtime or
+   * produces incorrect behavior. Setting `serverExternalPackages: ['stripe']` tells
+   * Next.js to treat `stripe` as an external dependency — loaded from node_modules at
+   * runtime rather than inlined into the function bundle. This is the Stripe-recommended
+   * pattern for Next.js App Router.
+   *
+   * SYMPTOM WITHOUT THIS: /api/stripe/checkout returns 500 "Failed to create checkout
+   * session" even when STRIPE_SECRET_KEY is correctly set and valid.
+   * Fixed 2026-03-25 after isolating that direct Stripe curl worked but the Next.js
+   * API route failed — confirming the bundling issue, not a key or configuration issue.
+   */
+  serverExternalPackages: ["stripe"],
+
+  /**
    * Allow images from fal.ai CDN domains.
    * This is needed if/when we switch from <img> to next/image for the
    * generated QR art preview. next/image requires explicit domain allowlisting

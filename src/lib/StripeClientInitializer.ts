@@ -67,8 +67,13 @@ function getStripeServerSideClient(): Stripe {
      * We intentionally do NOT pin apiVersion here and let the SDK use its default,
      * because the Stripe npm package version already targets a specific API version.
      * Pinning a mismatched version would cause type errors.
+     *
+     * NOTE: `typescript: true` was previously here but it is NOT a valid Stripe SDK
+     * option in v16+ (and v20.4.1 which we use). The valid options are apiVersion,
+     * maxNetworkRetries, httpAgent, timeout, host, port, protocol, telemetry, etc.
+     * Having an invalid option would cause the Stripe constructor to throw at runtime,
+     * making all checkout and webhook calls fail with a 500. Removed 2026-03-25.
      */
-    typescript: true,
   });
 
   return cachedStripeClient;
