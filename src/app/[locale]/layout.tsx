@@ -61,10 +61,14 @@ const geistMono = Geist_Mono({
 });
 
 /**
- * The canonical site URL. Update when a custom domain is configured.
- * Used for metadataBase in shared layout metadata.
+ * The canonical site URL — qrart.symplyai.io is the symplyai.io subdomain assigned to this product.
+ * Used for metadataBase in shared layout metadata so Next.js resolves all relative metadata URLs
+ * against the correct production host.
+ *
+ * Fixed 2026-03-25 (Builder 6): was hardcoded to vercel.app. Since we serve traffic from
+ * qrart.symplyai.io, the metadataBase must match or Google Search Console shows canonical mismatch.
  */
-const siteUrl = "https://ai-qr-art-generator.vercel.app";
+const siteUrl = "https://qrart.symplyai.io";
 
 /**
  * generateStaticParams — tells Next.js which locale segments to pre-render.

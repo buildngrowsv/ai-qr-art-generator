@@ -127,7 +127,9 @@ export async function POST(request: NextRequest) {
     const appBaseUrl =
       configuredUrl && configuredUrl.startsWith("https://")
         ? configuredUrl
-        : "https://ai-qr-art-generator.vercel.app";
+        // Fallback is now the canonical custom domain, not the Vercel preview URL.
+        // Fixed 2026-03-25 (Builder 6): was ai-qr-art-generator.vercel.app.
+        : "https://qrart.symplyai.io";
 
     /**
      * Create the Stripe Checkout Session via direct REST API call.

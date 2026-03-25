@@ -1,22 +1,63 @@
-# QRArtify (ai-qr-art-generator) — engineering status
+# QRArtify — AI QR Code Art Generator — Status
 
-## Production (Vercel)
+**Last updated:** 2026-03-25 (Builder 6 — canonical URL fix, verified live)
+**Repo:** github.com/buildngrowsv/ai-qr-art-generator
+**Stack:** Next.js 15, TypeScript, Tailwind CSS v4, fal.ai FLUX, Stripe, next-intl (EN+ES)
 
-- **Example deploy URL:** `https://ai-qr-code-mf7tczmba-buildngrowsvs-projects.vercel.app` (name varies by project).
-- **Payments:** App Router routes live in repo under `src/app/api/stripe/checkout`, `webhook`, `portal`.
+## Production URLs
 
-## Verification (2026-03-24, Builder 3)
+| Host | Status |
+|------|--------|
+| **https://qrart.symplyai.io** | ✅ HTTP 200 — CANONICAL |
+| https://ai-qr-art-generator.vercel.app | ✅ HTTP 200 — Vercel backup |
 
-- **Homepage:** HTTP 200; Next.js shell + chunks load.
-- **`POST /api/stripe/checkout` on the deploy above returned `404` (matched Next `404` page, not JSON).** That means the **currently linked Vercel deployment does not expose the Stripe API routes** (stale build, wrong project, or preview without serverless functions). **Fix:** redeploy this repo to that Vercel project from `main` after `npm run build` succeeds locally; confirm `POST /api/stripe/checkout` returns `400/401` JSON (not HTML 404) with an empty body.
+## Component Status
 
-## Local check
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Landing page | ✅ LIVE | Marketing-polished, unique SEO copy |
+| Core tool (generate) | ✅ LIVE | fal.ai FLUX model, art-style presets |
+| API route (/api/generate) | ✅ LIVE | Server-side, IP rate-limited, FAL_KEY set |
+| Stripe checkout route | ✅ LIVE | POST /api/stripe/checkout → JSON response (not 404) |
+| Stripe webhook route | ✅ LIVE | Signature verification in place |
+| Pricing page | ✅ LIVE | /pricing and /es/pricing — 200 OK |
+| EN+ES i18n | ✅ LIVE | next-intl, middleware.ts, app/[locale]/ routing |
+| SEO — canonical URLs | ✅ FIXED | All siteUrl/BASE_URL updated to qrart.symplyai.io |
+| Build | ✅ PASSES | Next.js 15, 16 static pages |
+| Deploy | ✅ LIVE | qrart.symplyai.io |
+| FAL_KEY | ✅ SET | Vercel production env var set |
 
-```bash
-npm ci
-npm run build
-```
+## Environment Variables (Vercel Production)
 
-## Stripe env (Vercel)
+| Var | Status | Notes |
+|-----|--------|-------|
+| `FAL_KEY` | ✅ Set | fal.ai key |
+| `STRIPE_SECRET_KEY` | ✅ Set | sk_live_ key |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ✅ Set | pk_live_ key |
+| `NEXT_PUBLIC_STRIPE_PRICE_ID_PRO` | ✅ Set | price_1TEUivGsPhST… ($9/mo) |
+| `NEXT_PUBLIC_STRIPE_PRICE_ID_BUSINESS` | ✅ Set | price for $29/mo |
+| `STRIPE_WEBHOOK_SECRET` | ✅ Set | whsec_ for signature verification |
+| `NEXT_PUBLIC_APP_URL` | ✅ Set | https://qrart.symplyai.io |
 
-Set `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, price IDs as documented in `src/app/api/stripe/checkout/route.ts`, and `STRIPE_WEBHOOK_SECRET` for `src/app/api/stripe/webhook/route.ts`.
+## What Works Right Now
+
+- Landing page renders fully ✅ (HTTP 200 verified)
+- Pricing page renders with real price IDs ✅ (Pro $9/mo, Business $29/mo)
+- POST /api/stripe/checkout → returns JSON (Stripe connection live, route working) ✅
+- POST /api/stripe/webhook → signature verification in place ✅
+- POST /api/generate → IP rate limit fires, FAL_KEY confirmed set ✅
+- EN+ES i18n routing working ✅
+- Canonical URLs fixed: robots.txt, sitemap.xml, OG tags, hreflang all use qrart.symplyai.io ✅
+
+## Remaining Items (BCL / Dashboard)
+
+- [ ] Verify Stripe webhook endpoint in Stripe dashboard points to https://qrart.symplyai.io/api/stripe/webhook
+- [ ] E2E payment flow test: actual checkout.stripe.com → success → credits added
+
+## Previous Verification History
+
+- 2026-03-24 Builder 3: checkout returned 404 on old stale Vercel deploy — FIXED by multiple
+  subsequent deploys with working routes (commits 24e725d, 8b2602f, 7c25b7c, 146cf7c, cdfd29b,
+  45d0ed4, 24e725d, 9ad3190, 8b39a2a)
+- 2026-03-25 Builder 6: canonical URL fix — all siteUrl/BASE_URL updated to qrart.symplyai.io
+  from hardcoded ai-qr-art-generator.vercel.app (commit TBD)

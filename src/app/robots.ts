@@ -13,7 +13,10 @@
 
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://ai-qr-art-generator.vercel.app";
+// Canonical domain — qrart.symplyai.io is the symplyai.io subdomain for this product.
+// Fixed 2026-03-25 (Builder 6): was hardcoded to vercel.app causing search engines to
+// index the wrong host and generating duplicate content warnings in GSC.
+const BASE_URL = "https://qrart.symplyai.io";
 
 export default function robots(): MetadataRoute.Robots {
   return {

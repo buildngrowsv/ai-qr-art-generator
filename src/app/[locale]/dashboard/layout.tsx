@@ -9,7 +9,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
-const siteUrl = "https://ai-qr-art-generator.vercel.app";
+// Canonical domain — qrart.symplyai.io. Fixed 2026-03-25 (Builder 6): was vercel.app.
+const siteUrl = "https://qrart.symplyai.io";
 
 export async function generateMetadata({
   params,

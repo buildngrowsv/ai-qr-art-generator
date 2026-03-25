@@ -5,7 +5,10 @@
 
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://ai-qr-art-generator.vercel.app";
+// Canonical domain for sitemap URLs — qrart.symplyai.io.
+// Fixed 2026-03-25 (Builder 6): was pointing to vercel.app; sitemap and robots must agree
+// on the canonical host so Google doesn't see two separate sites (Vercel vs custom domain).
+const BASE_URL = "https://qrart.symplyai.io";
 
 type PathSpec = {
   path: string;
