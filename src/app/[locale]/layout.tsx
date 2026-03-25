@@ -18,9 +18,10 @@
  *   - `lang={locale}` on <html> for correct screen reader / SEO locale signaling
  *   - NextIntlClientProvider wraps the app to propagate messages to client components
  *   - generateStaticParams exports EN+ES locales for static generation
- *   - generateMetadata uses getTranslations to serve locale-specific title/description
+ *   - generateMetadata here only sets metadataBase + robots; each route supplies
+ *     title, canonical, and hreflang (home, pricing, dashboard layouts)
  *   - setRequestLocale enables static rendering (avoids dynamic per-request overhead)
- *   - alternates.languages hreflang tells Google which locale each URL serves
+ *   - JSON-LD SoftwareApplication + FAQPage strings come from messages (JsonLd)
  *
  * DESIGN DECISION: Dark theme throughout (no light mode in v1).
  * Rationale: AI/creative tools feel more premium with dark backgrounds,
