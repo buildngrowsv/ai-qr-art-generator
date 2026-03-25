@@ -68,27 +68,24 @@ function getStripeServerSideClient(): Stripe {
      * because the Stripe npm package version already targets a specific API version.
      * Pinning a mismatched version would cause type errors.
      *
-     * NOTE: `typescript: true` was previously here but it is NOT a valid Stripe SDK
-     * option in v16+ (and v20.4.1 which we use). Removed 2026-03-25.
+     * NOTE: `typescript: true` was previously here but is NOT a valid Stripe SDK
+     * option in v16+ / v20.4.1. Removed 2026-03-25.
      *
-     * WHY FetchHttpClient (explicit, not default):
-     * Stripe v20 uses FetchHttpClient (native fetch) as its default. We confirmed
-     * that raw `fetch` to api.stripe.com WORKS from Vercel's Node.js serverless
-     * functions (tested via /api/stripe-test, 200 OK with valid data returned).
+     * WHY NO EXPLICIT httpClient:
+     * Stripe v20 defaults to FetchHttpClient (native fetch). We confirmed raw fetch
+     * to api.stripe.com returns 200 from Vercel serverless (tested via /api/stripe-test).
+     * We let the SDK use its default rather than passing httpClient explicitly, because:
+     * - Explicit httpClient type assignment can cause TypeScript build errors in some versions
+     * - The default is FetchHttpClient which is confirmed-working from Vercel
      *
-     * We tried NodeHttpClient (Node.js https module) but it produced:
-     * "An error occurred with our connection to Stripe. Request was retried N times."
-     * Reverting to FetchHttpClient (explicit) since fetch is confirmed-working from Vercel.
+     * Root cause history:
+     * (1) `typescript: true` was invalid, caused runtime throw in constructor
+     * (2) Missing serverExternalPackages: ['stripe'] caused webpack to bundle the Stripe SDK,
+     *     which broke the internal HTTP client regardless of which one was used.
+     * Both (1) and (2) are now fixed, so the default FetchHttpClient works normally.
      *
-     * The root cause of the ORIGINAL error (before any of these fixes) was:
-     * (1) `typescript: true` invalid option in the Stripe constructor
-     * (2) `serverExternalPackages: ['stripe']` missing in next.config.ts causing
-     *     webpack to bundle Stripe, which breaks both NodeHttpClient and FetchHttpClient.
-     * After fixing (1) and (2), FetchHttpClient works normally.
-     *
-     * maxNetworkRetries: 1 — fail faster on retry-exhaustion (original default is 2).
+     * maxNetworkRetries: 1 — reduce from default 2 to fail faster and surface errors quickly.
      */
-    httpClient: Stripe.createFetchHttpClient(),
     maxNetworkRetries: 1,
   });
 
