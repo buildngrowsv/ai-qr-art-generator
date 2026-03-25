@@ -187,15 +187,8 @@ export async function POST(request: NextRequest) {
     if (!stripeResponse.ok) {
       const stripeMsg = stripeData.error?.message ?? "Unknown Stripe error";
       console.error("[/api/stripe/checkout] Stripe API error:", stripeData);
-      // Temporarily include full debug info to identify which parameter is invalid
       return NextResponse.json(
-        {
-          error: `Stripe error: ${stripeMsg}`,
-          raw_error: stripeMsg,
-          debug_stripe_full: stripeData,
-          debug_success_url: successUrl,
-          debug_base_url: appBaseUrl,
-        },
+        { error: `Stripe error: ${stripeMsg}` },
         { status: 400 }
       );
     }
@@ -212,21 +205,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[/api/stripe/checkout] Failed to create checkout session:", error);
 
-    /*
-     * In development/debug: expose the raw Stripe error message so we can diagnose.
-     * The Stripe error object has .message, .code, .type for structured debugging.
-     * We include the actual message in the response body during initial launch so
-     * operators can see what's happening from a curl command without needing Vercel logs.
-     * TODO: Remove the raw_error field once checkout is confirmed working.
-     */
-    const stripeError = error instanceof Error ? error.message : String(error);
-
     return NextResponse.json(
-      {
-        error:
-          "Failed to create checkout session. Please try again or contact support.",
-        raw_error: stripeError,
-      },
+      { error: "Failed to create checkout session. Please try again or contact support." },
       { status: 500 }
     );
   }
