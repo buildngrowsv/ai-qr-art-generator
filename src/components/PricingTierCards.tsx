@@ -43,7 +43,12 @@ export default function PricingTierCards() {
 
     const priceId = tier.stripePriceId;
     if (!priceId || !priceId.startsWith("price_")) {
-      alert(tCard("billingNotConfigured"));
+      // Payment Link fallback: QR Art Studio Pro ($9.99/mo) — no env vars needed.
+      // When neither NEXT_PUBLIC_STRIPE_PAYMENT_LINK_PRO nor a valid price_ ID
+      // is configured on Vercel, redirect to the pre-built Stripe Payment Link.
+      // This ensures checkout always works on fresh deploys without env var setup.
+      // Source: Github/ai-clone-stripe-links.md — Builder 6 pane1774 2026-03-25.
+      window.location.href = "https://buy.stripe.com/bJe14n9bP0cg5Z981jfMA09";
       return;
     }
 
