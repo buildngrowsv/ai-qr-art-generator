@@ -24,8 +24,23 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import type Stripe from "stripe";
-import getStripeServerSideClient from "@/lib/StripeClientInitializer";
+
+/*
+ * WHY WE USE DIRECT FETCH INSTEAD OF STRIPE SDK HERE:
+ * Stripe v20 SDK uses FetchHttpClient (native fetch) by default. In Vercel
+ * Node.js serverless functions with Next.js 16, this produces:
+ *   "An error occurred with our connection to Stripe. Request was retried N times."
+ * Switching to NodeHttpClient also failed (same error with different retry count).
+ *
+ * Root cause (2026-03-25): the Stripe SDK's http client has issues with the
+ * specific Node.js/fetch implementation in Next.js 16 + Vercel serverless.
+ * However, plain `fetch()` to the Stripe REST API works perfectly.
+ *
+ * Solution: bypass the SDK entirely and use native fetch() for this route.
+ * This is safe — we're just calling Stripe's REST API which is stable.
+ * The SDK is kept in package.json for webhook signature verification in the
+ * webhook route (which uses `stripe.webhooks.constructEvent()`).
+ */
 
 /**
  * POST /api/stripe/checkout
@@ -79,15 +94,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let stripeClient: Stripe;
-    try {
-      stripeClient = getStripeServerSideClient();
-    } catch (configError) {
-      console.error("[/api/stripe/checkout] Stripe not configured:", configError);
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
       return NextResponse.json(
         {
-          error:
-            "Payments are not configured (missing STRIPE_SECRET_KEY). Use Payment Links or add secrets on Vercel.",
+          error: "Payments are not configured (missing STRIPE_SECRET_KEY). Add secrets on Vercel.",
           configured: false,
         },
         { status: 503 }
@@ -96,57 +107,65 @@ export async function POST(request: NextRequest) {
 
     /**
      * Determine the base URL for redirect URLs.
-     * In development, this is http://localhost:4827.
-     * In production, this should be the actual domain.
      *
-     * We use NEXT_PUBLIC_APP_URL because it's available in both server
-     * and client contexts, and it's explicitly set in .env.local.
+     * WHY WE AVOID NEXT_PUBLIC_APP_URL AS-IS:
+     * Stripe live mode requires HTTPS URLs. If NEXT_PUBLIC_APP_URL is set to
+     * http://localhost:4827 (common during initial setup), Stripe rejects with
+     * url_invalid. We only use the env var if it starts with https://, otherwise
+     * fall back to the hardcoded production URL.
+     *
+     * Root cause discovered 2026-03-25: the env var was stuck as localhost
+     * despite Vercel CLI attempts to update it.
      */
+    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL;
     const appBaseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4827";
+      configuredUrl && configuredUrl.startsWith("https://")
+        ? configuredUrl
+        : "https://ai-qr-art-generator.vercel.app";
 
     /**
-     * Create the Stripe Checkout Session.
+     * Create the Stripe Checkout Session via direct REST API call.
      *
-     * Key configuration choices:
-     *   - mode: "subscription" — we're selling monthly recurring plans
-     *   - payment_method_types: ["card"] — start simple, add more later
-     *   - allow_promotion_codes: true — lets us offer discount codes
-     *   - success_url: dashboard with ?success=true for a success message
-     *   - cancel_url: pricing page so they can try again
+     * WHY DIRECT FETCH NOT SDK:
+     * Stripe v20 SDK HTTP client (FetchHttpClient + NodeHttpClient) both fail
+     * in this Next.js 16 + Vercel serverless environment. Native fetch() to the
+     * Stripe REST API works reliably. See comment at top of file for full context.
      *
-     * The {CHECKOUT_SESSION_ID} placeholder is replaced by Stripe with the
-     * actual session ID, which we could use to verify the session on the
-     * success page (not implemented in v1 but ready for it).
+     * Key configuration:
+     *   - mode: subscription (monthly recurring plans)
+     *   - allow_promotion_codes: true (launch discount codes in Stripe Dashboard)
+     *   - success_url: includes {CHECKOUT_SESSION_ID} placeholder (Stripe replaces it)
      */
-    const stripeCheckoutSession =
-      await stripeClient.checkout.sessions.create({
-        mode: "subscription",
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          },
-        ],
-        /*
-         * Allow Stripe promotion codes — useful for launch promotions.
-         * We can create codes in the Stripe Dashboard without code changes.
-         */
-        allow_promotion_codes: true,
+    const body = new URLSearchParams({
+      mode: "subscription",
+      "payment_method_types[0]": "card",
+      "line_items[0][price]": priceId,
+      "line_items[0][quantity]": "1",
+      allow_promotion_codes: "true",
+      success_url: `${appBaseUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appBaseUrl}/pricing?checkout=cancelled`,
+    });
 
-        /*
-         * Success URL — redirect here after successful payment.
-         * The dashboard page will show a success message when ?checkout=success.
-         */
-        success_url: `${appBaseUrl}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    });
 
-        /*
-         * Cancel URL — redirect here if the user clicks "Back" on Stripe.
-         * Going back to pricing lets them reconsider or pick a different plan.
-         */
-        cancel_url: `${appBaseUrl}/pricing?checkout=cancelled`,
-      });
+    type StripeCheckoutResponse = { id: string; url: string; error?: { message: string; code: string } };
+    const stripeData = await stripeResponse.json() as StripeCheckoutResponse;
+
+    if (!stripeResponse.ok) {
+      const stripeMsg = stripeData.error?.message ?? "Unknown Stripe error";
+      console.error("[/api/stripe/checkout] Stripe API error:", stripeData);
+      return NextResponse.json(
+        { error: `Stripe error: ${stripeMsg}`, raw_error: stripeMsg },
+        { status: 400 }
+      );
+    }
 
     /**
      * Return the checkout URL. The client will redirect the browser to this URL.
@@ -154,8 +173,8 @@ export async function POST(request: NextRequest) {
      * redirects back to our app when done.
      */
     return NextResponse.json({
-      checkoutUrl: stripeCheckoutSession.url,
-      sessionId: stripeCheckoutSession.id,
+      checkoutUrl: stripeData.url,
+      sessionId: stripeData.id,
     });
   } catch (error) {
     console.error("[/api/stripe/checkout] Failed to create checkout session:", error);

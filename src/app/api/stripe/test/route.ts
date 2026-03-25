@@ -19,7 +19,9 @@ export async function GET() {
   try {
     // Direct REST call — bypasses the Stripe SDK entirely
     const priceId = "price_1TEUivGsPhSTDD4xrSMxEyHG";
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ai-qr-art-generator.vercel.app";
+    // Hardcoded production URL — NEXT_PUBLIC_APP_URL may still be set to localhost
+    // This proves the checkout works when the URL is correct
+    const appUrl = "https://ai-qr-art-generator.vercel.app";
 
     const body = new URLSearchParams({
       mode: "subscription",
