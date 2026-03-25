@@ -41,6 +41,16 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* Mobile overflow fix — Agent 21 (2026-03-24)
+     Prevents horizontal scroll from absolute-positioned gradient orbs
+     and wide elements at narrow viewports. #1 mobile UX issue across AI tool sites. */
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+html {
+  /* Mobile overflow fix — Agent 21 (2026-03-24) */
+  overflow-x: hidden;
 }
 
 /*
