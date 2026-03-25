@@ -71,21 +71,24 @@ function getStripeServerSideClient(): Stripe {
      * NOTE: `typescript: true` was previously here but it is NOT a valid Stripe SDK
      * option in v16+ (and v20.4.1 which we use). Removed 2026-03-25.
      *
-     * WHY NodeHttpClient: Stripe v20 uses native fetch() by default (FetchHttpClient).
-     * In Vercel serverless functions (Node.js runtime), native fetch can encounter
-     * "connection refused" or retry-exhaustion errors: "An error occurred with our
-     * connection to Stripe. Request was retried 2 times." Switching to NodeHttpClient
-     * (which uses Node.js built-in http/https modules) avoids this issue.
+     * WHY FetchHttpClient (explicit, not default):
+     * Stripe v20 uses FetchHttpClient (native fetch) as its default. We confirmed
+     * that raw `fetch` to api.stripe.com WORKS from Vercel's Node.js serverless
+     * functions (tested via /api/stripe-test, 200 OK with valid data returned).
      *
-     * Root cause discovered 2026-03-25 during pane1774 swarm: direct Stripe REST API
-     * calls with curl worked fine, but the SDK-based route kept failing. The difference
-     * was the HTTP client (fetch vs node https). NodeHttpClient is the battle-tested
-     * approach for serverless Node.js environments.
+     * We tried NodeHttpClient (Node.js https module) but it produced:
+     * "An error occurred with our connection to Stripe. Request was retried N times."
+     * Reverting to FetchHttpClient (explicit) since fetch is confirmed-working from Vercel.
      *
-     * maxNetworkRetries: 1 — reduce retries from default 2 to avoid timeout issues.
-     * If Stripe is unreachable, fail fast with a clear error rather than waiting 3x.
+     * The root cause of the ORIGINAL error (before any of these fixes) was:
+     * (1) `typescript: true` invalid option in the Stripe constructor
+     * (2) `serverExternalPackages: ['stripe']` missing in next.config.ts causing
+     *     webpack to bundle Stripe, which breaks both NodeHttpClient and FetchHttpClient.
+     * After fixing (1) and (2), FetchHttpClient works normally.
+     *
+     * maxNetworkRetries: 1 — fail faster on retry-exhaustion (original default is 2).
      */
-    httpClient: Stripe.createNodeHttpClient(),
+    httpClient: Stripe.createFetchHttpClient(),
     maxNetworkRetries: 1,
   });
 
