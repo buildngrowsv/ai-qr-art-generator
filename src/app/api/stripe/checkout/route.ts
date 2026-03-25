@@ -187,8 +187,15 @@ export async function POST(request: NextRequest) {
     if (!stripeResponse.ok) {
       const stripeMsg = stripeData.error?.message ?? "Unknown Stripe error";
       console.error("[/api/stripe/checkout] Stripe API error:", stripeData);
+      // Temporarily include full debug info to identify which parameter is invalid
       return NextResponse.json(
-        { error: `Stripe error: ${stripeMsg}`, raw_error: stripeMsg },
+        {
+          error: `Stripe error: ${stripeMsg}`,
+          raw_error: stripeMsg,
+          debug_stripe_full: stripeData,
+          debug_success_url: successUrl,
+          debug_base_url: appBaseUrl,
+        },
         { status: 400 }
       );
     }
