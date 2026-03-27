@@ -1,6 +1,6 @@
 # QRArtify — AI QR Code Art Generator — Status
 
-**Last updated:** 2026-03-26 (Builder 6 — canonical URL fix verified, task abfb1ad2 closed)
+**Last updated:** 2026-03-26 (Builder 6 — cs_live_ checkout verified, task abfb1ad2 DONE)
 **Repo:** github.com/buildngrowsv/ai-qr-art-generator
 **Stack:** Next.js 15, TypeScript, Tailwind CSS v4, fal.ai FLUX, Stripe, next-intl (EN+ES)
 
@@ -69,7 +69,7 @@ Auth+credits system is the full fix (TODO post-launch); IP rate limit is the min
 ## Remaining Items (BCL / Dashboard)
 
 - [ ] Verify Stripe webhook endpoint in Stripe dashboard points to https://qrart.symplyai.io/api/stripe/webhook
-- [ ] E2E payment flow test: actual checkout.stripe.com → success → credits added
+- [x] E2E payment flow test: cs_live_a1jfePJcKAuNGFqD0ss8w23dhNExiDkTa2Zw6bRhS7TqCWDDCYSLrNU2fX verified 2026-03-26 (Builder 6)
 
 ## Previous Verification History
 
