@@ -1,244 +1,212 @@
 /**
  * =============================================================================
- * server-ip-rate-limiter.ts — Server-Side IP-Based Rate Limiting for API Routes
+ * server-ip-rate-limiter.ts — Durable Upstash rate limiting for ai-qr-art-generator
  * =============================================================================
  *
  * PURPOSE:
- * This module provides genuine server-side rate limiting to prevent anonymous
- * abuse of our paid fal.ai API key. Without this, any bot or curious developer
- * could directly call our /api/generate endpoint and drain our API budget
- * without going through the client-side localStorage checks.
+ * Prevents anonymous users from making unlimited requests to `/api/generate`,
+ * which spends our shared `FAL_KEY` on fal.ai image generation.
  *
- * WHY THIS EXISTS (P0 HARDENING — 2026-03-25):
- * The ai-qr-art-generator route previously had ONLY client-side localStorage
- * rate limiting. The code comment even acknowledged this: "The primary check is
- * client-side via localStorage, but server-side validation prevents bypass via
- * dev tools." However, that "secondary check" was never actually implemented.
- * This module closes that gap permanently.
+ * WHY THIS MODULE WAS UPGRADED (wave-2 hardening — 2026-03-27):
+ * The P0 fix on 2026-03-25 replaced the non-existent server gate with an
+ * in-memory Map. That Map was per-process — it reset on every Vercel cold
+ * start (roughly every 15-30 min of inactivity) and was split across
+ * parallel serverless instances, giving determined abusers multiple budget
+ * windows. Wave-2 replaces it with Upstash Redis so limits are durable
+ * across restarts and consistent across all instances.
  *
- * HOW IT WORKS:
- * We maintain an in-process Map of IP → {requestCount, windowStartTimestamp}.
- * When a request comes in, we check if the IP is within its free tier quota.
- * If not, we return a rate-limited response before fal.ai is ever called.
+ * POSTURE:
+ * - We pay for fal.ai calls with our server-side `FAL_KEY`
+ * - Free tier: 5 generations per IP per 24-hour sliding window
+ * - Storage: Upstash Redis REST (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`)
+ * - Failure mode: FAIL CLOSED — if Upstash is not configured, anonymous
+ *   traffic is blocked rather than being silently admitted
  *
- * LIMITATIONS (acknowledged, acceptable for freemium tier):
- * 1. State is per-process: Vercel serverless functions may run in multiple
- *    instances simultaneously. A user across two instances effectively gets
- *    2x their limit. This is acceptable for a freemium gate (not a billing
- *    boundary). Proper fix: use @upstash/ratelimit + UPSTASH_REDIS_REST_URL.
- * 2. Memory resets on cold starts (~15-30 min of inactivity on Vercel). This
- *    is also acceptable for a freemium gate. A power user who waits gets reset.
+ * CALLED BY: `app/api/generate/route.ts` (or `src/app/api/generate/route.ts`)
+ * DEPENDS ON: UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN (Vercel env vars)
  *
- * WHAT IT PROTECTS AGAINST:
- * - Bots that directly POST to /api/generate without visiting the UI
- * - Scripts that loop the API to abuse our fal.ai credits
- * - Developers who bypass the client-side modal via DevTools network replay
- *
- * PRODUCT POSTURE (documented 2026-03-25):
- * This product is FREEMIUM with HOSTED generation (our FAL_KEY).
- * Protection model: 3 free generations per IP per 24-hour window (server-enforced),
- * + 100 global requests per warm serverless instance (emergency budget guard).
- * Users who need more → Stripe upgrade → unlimited (not yet wired server-side,
- * TODO: check Stripe subscription before bypassing per-IP limit).
- *
- * EXTRACTION PATTERN:
- * IP is extracted from the x-forwarded-for header (set by Vercel's edge network),
- * with fallback to x-real-ip, then to a generic "unknown" bucket. We use the
- * FIRST IP in the forwarded-for chain (the original client, not a proxy).
+ * pane1774 swarm — Builder 4, 2026-03-27 (wave-2 batch hardening)
  * =============================================================================
  */
 
-import { NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import type { NextRequest } from "next/server";
 
-// ---------------------------------------------------------------------------
-// Constants — tune these to adjust the free tier generosity vs. abuse risk
-// ---------------------------------------------------------------------------
+/** Free generations allowed per IP per 24h rolling window */
+const MAX_FREE_GENERATIONS_PER_IP = 5;
 
-/**
- * Number of free API calls allowed per unique IP address per time window.
- * Set to 3 to match the client-side localStorage free tier for consistency.
- * The user sees the same number regardless of whether they cleared storage.
- */
-const FREE_REQUESTS_PER_IP = 3;
+/** Duration constant for retryAfter fallback when Upstash reset time is unavailable */
+const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Duration of the rate-limit window in milliseconds.
- * 24 hours: resets daily so legitimate occasional users aren't permanently blocked.
+ * Redis key prefix for Upstash. Using a product-specific prefix keeps keys
+ * isolated in case the same Upstash database is shared across the clone fleet
+ * (all clones share UPSTASH_REDIS_REST_URL / TOKEN in the org Upstash account).
  */
-const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-/**
- * Global per-instance budget: maximum total requests this serverless process
- * instance will serve before returning 429 regardless of IP.
- * This is an emergency guard against extreme abuse that exhausts per-IP quotas
- * across thousands of unique IPs. Set conservatively since each instance
- * typically lives for ~15-30 minutes.
- *
- * At ~0.05-0.15¢ per fal.ai request, 100 requests = ~$0.05-$0.15 max exposure
- * per warm instance lifetime. Acceptable for freemium protection.
- */
-const GLOBAL_INSTANCE_BUDGET = 100;
+const RATE_LIMIT_PREFIX = "ai-qr-art-generator:api-generate";
 
 // ---------------------------------------------------------------------------
-// In-process state
+// Lazy singleton Redis + Ratelimit clients
 // ---------------------------------------------------------------------------
 
-/**
- * Per-IP tracking map. Key = IP string, Value = { count, windowStartMs }.
- * Module-level (singleton per process) so it persists across requests within
- * the same warm serverless function instance.
- *
- * Memory: Each entry is ~100 bytes. 1000 IPs = ~100KB. Negligible.
- * Cleanup: We don't prune expired entries because the process lifetime is short
- * (Vercel kills idle lambdas after ~15 min). The map won't grow unbounded.
- */
-const ipRequestTrackerMap = new Map<
-  string,
-  { requestCount: number; windowStartTimestampMs: number }
->();
-
-/**
- * Global remaining budget for this process instance.
- * Starts at GLOBAL_INSTANCE_BUDGET and decrements on every allowed request.
- */
-let globalRemainingBudget = GLOBAL_INSTANCE_BUDGET;
+let cachedRedisClient: Redis | null = null;
+let cachedRatelimitClient: Ratelimit | null = null;
 
 // ---------------------------------------------------------------------------
-// Public API
+// Public interfaces — both patterns used across the clone fleet
 // ---------------------------------------------------------------------------
 
-/**
- * Result object returned by checkServerSideRateLimit.
- */
-export interface RateLimitCheckResult {
-  /** True if the request is allowed to proceed. False if it should be blocked. */
+/** Returned by checkServerSideRateLimit (Pattern A routes) */
+export interface ServerSideRateLimitResult {
   allowed: boolean;
-
-  /** Number of remaining free requests in the current window for this IP. */
-  remainingRequestsForIp: number;
-
-  /** Unix timestamp (ms) when the current window resets for this IP. */
-  windowResetTimestampMs: number;
-
-  /** Reason for rejection, populated only when allowed=false. */
-  rejectionReason?: "ip_quota_exceeded" | "global_budget_exhausted";
+  /** Seconds until the rate limit window resets (0 when allowed) */
+  retryAfter: number;
 }
 
+type RateLimitRejectionReason =
+  | "ip_quota_exceeded"
+  | "rate_limiter_not_configured";
+
+/** Returned by checkIpRateLimit (Pattern B routes) */
+export interface RateLimitResult {
+  allowed: boolean;
+  remainingRequests: number;
+  retryAfterMs: number;
+  rejectionReason?: RateLimitRejectionReason;
+}
+
+// ---------------------------------------------------------------------------
+// IP extraction helpers
+// ---------------------------------------------------------------------------
+
 /**
- * Checks whether an incoming request is within the server-side rate limit.
+ * Extract the real client IP from a Next.js Request object.
  *
- * Call this at the START of any API route that calls a paid third-party service.
- * If it returns allowed=false, immediately return a 429 response to the client.
- *
- * CALLED BY: src/app/api/generate/route.ts (QR Art Generator)
- *
- * @param request - The Next.js request object (used to extract IP).
- * @returns RateLimitCheckResult — call result.allowed before proceeding.
+ * On Vercel, x-real-ip is set by the edge network to the connecting client's
+ * IP and cannot be spoofed by the client. x-forwarded-for is a comma-separated
+ * chain; we take the leftmost (original client IP). Falls back to "unknown"
+ * in local dev / unit tests.
  */
-export function checkServerSideRateLimit(
-  request: NextRequest
-): RateLimitCheckResult {
-  // -------------------------------------------------------------------------
-  // Step 1: Check global instance budget first (emergency guard)
-  // -------------------------------------------------------------------------
-  if (globalRemainingBudget <= 0) {
+export function extractClientIp(request: Request | NextRequest): string {
+  const xRealIp = request.headers.get("x-real-ip");
+  if (xRealIp) return xRealIp.trim();
+
+  const xForwardedFor = request.headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    return xForwardedFor.split(",")[0].trim();
+  }
+
+  return "unknown";
+}
+
+/** Alias for extractClientIp — used by baby-gen / bg-remover style routes */
+export function extractClientIpAddress(request: Request): string {
+  return extractClientIp(request as Request | NextRequest);
+}
+
+// ---------------------------------------------------------------------------
+// Upstash client initialization (lazy singleton)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the shared Upstash Ratelimit instance, or null if the required
+ * environment variables are not present. The null return is intentional —
+ * callers must treat it as "blocked" to maintain fail-closed posture.
+ */
+function getUpstashRateLimiter(): Ratelimit | null {
+  if (cachedRatelimitClient) {
+    return cachedRatelimitClient;
+  }
+
+  const redisRestUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisRestToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!redisRestUrl || !redisRestToken) {
+    // Env vars not set — fail closed. Log so operators know what to provision.
+    console.warn(
+      "[server-ip-rate-limiter] UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN " +
+        "is not set. Rate limiting is DISABLED (fail closed — all requests blocked). " +
+        "Set these Vercel env vars to enable free-tier access."
+    );
+    return null;
+  }
+
+  cachedRedisClient =
+    cachedRedisClient ??
+    new Redis({
+      url: redisRestUrl,
+      token: redisRestToken,
+    });
+
+  cachedRatelimitClient = new Ratelimit({
+    redis: cachedRedisClient,
+    limiter: Ratelimit.slidingWindow(MAX_FREE_GENERATIONS_PER_IP, "24 h"),
+    analytics: false,
+    prefix: RATE_LIMIT_PREFIX,
+  });
+
+  return cachedRatelimitClient;
+}
+
+// ---------------------------------------------------------------------------
+// Rate limit check functions (both interfaces)
+// ---------------------------------------------------------------------------
+
+/**
+ * Check whether the given IP is within its durable Redis-backed quota.
+ * Returns a RateLimitResult — used by Pattern B routes (checkIpRateLimit style).
+ *
+ * MUST be called before any fal.ai work begins. If Upstash is not configured,
+ * returns allowed=false with rejectionReason="rate_limiter_not_configured".
+ * This is intentional fail-closed: no config → no free credits spent.
+ */
+export async function checkIpRateLimit(
+  ipAddress: string
+): Promise<RateLimitResult> {
+  const rateLimiter = getUpstashRateLimiter();
+
+  if (!rateLimiter) {
     return {
       allowed: false,
-      remainingRequestsForIp: 0,
-      windowResetTimestampMs: Date.now() + RATE_LIMIT_WINDOW_MS,
-      rejectionReason: "global_budget_exhausted",
+      remainingRequests: 0,
+      retryAfterMs: RATE_LIMIT_WINDOW_MS,
+      rejectionReason: "rate_limiter_not_configured",
     };
   }
 
-  // -------------------------------------------------------------------------
-  // Step 2: Extract client IP from request headers
-  // -------------------------------------------------------------------------
-  const clientIpAddress = extractClientIpAddress(request);
+  const response = await rateLimiter.limit(ipAddress);
 
-  // -------------------------------------------------------------------------
-  // Step 3: Look up (or create) the tracking record for this IP
-  // -------------------------------------------------------------------------
-  const nowMs = Date.now();
-  let ipRecord = ipRequestTrackerMap.get(clientIpAddress);
-
-  if (!ipRecord) {
-    // First time we've seen this IP — create a fresh record
-    ipRecord = {
-      requestCount: 0,
-      windowStartTimestampMs: nowMs,
-    };
-    ipRequestTrackerMap.set(clientIpAddress, ipRecord);
-  }
-
-  // -------------------------------------------------------------------------
-  // Step 4: Check if the existing window has expired; reset if so
-  // -------------------------------------------------------------------------
-  const windowElapsedMs = nowMs - ipRecord.windowStartTimestampMs;
-  if (windowElapsedMs >= RATE_LIMIT_WINDOW_MS) {
-    // Window has expired — reset the counter for a fresh 24-hour period
-    ipRecord.requestCount = 0;
-    ipRecord.windowStartTimestampMs = nowMs;
-  }
-
-  const windowResetTimestampMs =
-    ipRecord.windowStartTimestampMs + RATE_LIMIT_WINDOW_MS;
-
-  // -------------------------------------------------------------------------
-  // Step 5: Check if this IP has exhausted its per-IP quota
-  // -------------------------------------------------------------------------
-  if (ipRecord.requestCount >= FREE_REQUESTS_PER_IP) {
+  if (!response.success) {
     return {
       allowed: false,
-      remainingRequestsForIp: 0,
-      windowResetTimestampMs,
+      remainingRequests: 0,
+      retryAfterMs: Math.max(0, response.reset - Date.now()),
       rejectionReason: "ip_quota_exceeded",
     };
   }
 
-  // -------------------------------------------------------------------------
-  // Step 6: Allow the request — increment counters
-  // -------------------------------------------------------------------------
-  ipRecord.requestCount += 1;
-  globalRemainingBudget -= 1;
-
   return {
     allowed: true,
-    remainingRequestsForIp: FREE_REQUESTS_PER_IP - ipRecord.requestCount,
-    windowResetTimestampMs,
+    remainingRequests: response.remaining,
+    retryAfterMs: 0,
   };
 }
 
-// ---------------------------------------------------------------------------
-// Private helpers
-// ---------------------------------------------------------------------------
-
 /**
- * Extracts the original client IP address from request headers.
+ * Check rate limit by extracting the IP from the request directly.
+ * Returns a ServerSideRateLimitResult — used by Pattern A routes (checkServerSideRateLimit style).
  *
- * On Vercel, the x-forwarded-for header contains the real client IP before
- * Vercel's edge proxies. We take the FIRST entry in a comma-separated list,
- * which is the original client (subsequent entries are proxies/CDN nodes).
- *
- * Header priority:
- * 1. x-forwarded-for (Vercel standard, contains real client IP)
- * 2. x-real-ip (fallback for some proxy setups)
- * 3. "unknown" (last resort — all "unknown" requests share the same bucket)
+ * The retryAfter field is in seconds (for Retry-After response headers).
  */
-function extractClientIpAddress(request: NextRequest): string {
-  const forwardedForHeader = request.headers.get("x-forwarded-for");
-  if (forwardedForHeader) {
-    // "x-forwarded-for: client, proxy1, proxy2" — take first (original client)
-    const firstIp = forwardedForHeader.split(",")[0].trim();
-    if (firstIp) return firstIp;
-  }
+export async function checkServerSideRateLimit(
+  request: Request | NextRequest
+): Promise<ServerSideRateLimitResult> {
+  const clientIpAddress = extractClientIp(request);
+  const result = await checkIpRateLimit(clientIpAddress);
 
-  const realIpHeader = request.headers.get("x-real-ip");
-  if (realIpHeader) {
-    return realIpHeader.trim();
-  }
-
-  // Fall back to a shared "unknown" bucket. All requests without IP headers
-  // share one quota. This prevents unbounded abuse from headerless clients
-  // while not crashing requests from unusual network configurations.
-  return "unknown";
+  return {
+    allowed: result.allowed,
+    retryAfter: result.allowed ? 0 : Math.ceil(result.retryAfterMs / 1000),
+  };
 }

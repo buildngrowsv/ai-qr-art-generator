@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
      * See src/lib/server-ip-rate-limiter.ts for full rationale, constants (3 req/IP/24h,
      * 100 global budget per instance), and Upstash Redis upgrade path.
      */
-    const rateLimitResult = checkServerSideRateLimit(request);
+    const rateLimitResult = await checkServerSideRateLimit(request);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         {
