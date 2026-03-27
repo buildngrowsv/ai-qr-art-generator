@@ -24,6 +24,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createPendingToken } from "@/lib/subscription-store";
 
 /*
  * WHY WE USE DIRECT FETCH INSTEAD OF STRIPE SDK HERE:
@@ -132,6 +133,21 @@ export async function POST(request: NextRequest) {
         : "https://qrart.symplyai.io";
 
     /**
+     * T018: Generate a Pro subscription token for this checkout session.
+     *
+     * This UUID token is:
+     *   1. Stored in Redis as "pending" (1h TTL) via createPendingToken()
+     *   2. Passed as client_reference_id to Stripe — the webhook reads it on
+     *      checkout.session.completed to activate the token in Redis
+     *   3. Embedded in the success URL (?token=...) so the client can capture it
+     *      from localStorage and include it in future generate requests
+     *
+     * Token lifecycle: pending → active (on webhook) → checked in generate route
+     * See: src/lib/subscription-store.ts for the full design and Redis key schema.
+     */
+    const subscriptionToken = await createPendingToken();
+
+    /**
      * Create the Stripe Checkout Session via direct REST API call.
      *
      * WHY DIRECT FETCH NOT SDK:
@@ -142,7 +158,8 @@ export async function POST(request: NextRequest) {
      * Key configuration:
      *   - mode: subscription (monthly recurring plans)
      *   - allow_promotion_codes: true (launch discount codes in Stripe Dashboard)
-     *   - success_url: includes {CHECKOUT_SESSION_ID} placeholder (Stripe replaces it)
+     *   - client_reference_id: subscriptionToken (for webhook activation)
+     *   - success_url: includes ?token= param so client captures Pro token
      */
     /*
      * WHY WE DON'T USE URLSearchParams FOR THE FULL BODY:
@@ -156,12 +173,12 @@ export async function POST(request: NextRequest) {
      * The cancel_url has no placeholders so it can be encoded normally.
      */
     /*
-     * Note: we omit {CHECKOUT_SESSION_ID} placeholder for now — Stripe requires
-     * literal curly braces in the URL which can cause url_invalid issues depending
-     * on how the form body is encoded. The session ID is not needed for v1 functionality.
-     * Can be re-added once basic checkout flow is confirmed working.
+     * T018: success_url embeds the subscriptionToken as ?token= so the client can
+     * read it from window.location.search on page load and store it in localStorage.
+     * The client then sends it as the x-pro-token header in generate requests.
+     * This is the fleet-standard token handoff pattern (hairstyle-generator ref).
      */
-    const successUrl = `${appBaseUrl}/dashboard?checkout=success`;
+    const successUrl = `${appBaseUrl}/dashboard?checkout=success&token=${subscriptionToken}`;
     const cancelUrl = `${appBaseUrl}/pricing?checkout=cancelled`;
 
     const body = [
@@ -170,6 +187,8 @@ export async function POST(request: NextRequest) {
       `line_items[0][price]=${encodeURIComponent(priceId)}`,
       "line_items[0][quantity]=1",
       "allow_promotion_codes=true",
+      // T018: client_reference_id carries the subscription token through to the webhook
+      `client_reference_id=${encodeURIComponent(subscriptionToken)}`,
       `success_url=${encodeURIComponent(successUrl)}`,
       `cancel_url=${encodeURIComponent(cancelUrl)}`,
     ].join("&");

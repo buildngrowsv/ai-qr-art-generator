@@ -28,6 +28,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import getStripeServerSideClient from "@/lib/StripeClientInitializer";
 import Stripe from "stripe";
+import { activateToken } from "@/lib/subscription-store";
+
+/**
+ * T018: Node.js runtime required for crypto.subtle HMAC (used by Stripe SDK
+ * signature verification) and for the Upstash Redis client used in activateToken().
+ * Edge runtime does not support these reliably in Next.js 16 + Vercel serverless.
+ */
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * POST /api/stripe/webhook
@@ -134,12 +143,36 @@ export async function POST(request: NextRequest) {
           `Amount: ${checkoutSession.amount_total}c ${checkoutSession.currency}`
         );
 
-        /*
-         * TODO (post-auth): Update user tier in database.
-         * const userEmail = checkoutSession.customer_details?.email;
-         * const subscriptionId = checkoutSession.subscription;
-         * await updateUserTier(userEmail, subscriptionId);
+        /**
+         * T018: Activate the subscription token in Upstash Redis.
+         *
+         * The subscription token was set as client_reference_id at checkout creation
+         * (see /api/stripe/checkout/route.ts → createPendingToken()).
+         * If present, we activate it in Redis — the user's generate requests will
+         * now bypass the IP rate limiter, enabling unlimited Pro generations.
+         *
+         * Token lifecycle:
+         *   pending (1h TTL, set at checkout) → active (13-month TTL, set here)
+         * See: src/lib/subscription-store.ts for the full lifecycle design.
          */
+        const subscriptionToken = checkoutSession.client_reference_id;
+        if (subscriptionToken) {
+          await activateToken(subscriptionToken);
+          console.log("[Stripe Webhook] checkout.session.completed — Pro token activated", {
+            token: subscriptionToken,
+            customer: checkoutSession.customer,
+            email: checkoutSession.customer_details?.email,
+            subscription: checkoutSession.subscription,
+          });
+        } else {
+          // Sessions created before T018 deploy won't have client_reference_id.
+          // Log the conversion but we cannot grant Pro access without a token.
+          console.warn(
+            "[Stripe Webhook] checkout.session.completed — no client_reference_id. " +
+            "Pro access cannot be granted for this purchase. Customer: " +
+            checkoutSession.customer_details?.email
+          );
+        }
         break;
       }
 

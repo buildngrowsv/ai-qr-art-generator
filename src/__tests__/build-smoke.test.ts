@@ -2,7 +2,7 @@
  * build-smoke.test.ts — Smoke tests for AI QR Art Generator
  *
  * ROUTE CONTRACT:
- * - POST /api/generate: input validation first (400), then rate limit (429)
+ * - POST /api/generate: server-side fail-closed rate limit runs first (429)
  * - POST /api/stripe/checkout: 503 if STRIPE_SECRET_KEY absent; 400 if bad price ID
  * - POST /api/stripe/webhook: 500 if STRIPE_WEBHOOK_SECRET absent; 400 if bad body
  * - POST /api/stripe/portal: tests that the route exists and exports POST
@@ -37,9 +37,12 @@ describe("Build smoke tests — ai-qr-art-generator", () => {
     expect(typeof route.POST).toBe("function");
   });
 
-  it("should return 400 from /api/generate when URL is missing", async () => {
-    // In this route, input validation runs before FAL_KEY check.
-    // Missing 'url' field → 400 Bad Request.
+  it("should return 429 from /api/generate when Upstash rate limiting is not configured", async () => {
+    // The route intentionally checks server-side rate limiting before request-body
+    // validation so anonymous abuse is blocked with minimal server work.
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+
     const { POST } = await import("../app/api/generate/route");
     const req = new Request("http://localhost/api/generate", {
       method: "POST",
@@ -48,7 +51,7 @@ describe("Build smoke tests — ai-qr-art-generator", () => {
     });
 
     const res = await POST(req as any);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(429);
     const body = await res.json();
     expect(body).toHaveProperty("error");
   });

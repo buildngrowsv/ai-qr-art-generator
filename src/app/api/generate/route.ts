@@ -31,6 +31,7 @@ import {
 } from "@/lib/AuthenticationPlaceholder";
 import { findPricingTierById } from "@/lib/StripePricingConfiguration";
 import { checkServerSideRateLimit } from "@/lib/server-ip-rate-limiter";
+import { isProActive } from "@/lib/subscription-store";
 
 /**
  * POST /api/generate
@@ -50,38 +51,59 @@ import { checkServerSideRateLimit } from "@/lib/server-ip-rate-limiter";
 export async function POST(request: NextRequest) {
   try {
     /**
-     * Step 0: Server-side IP rate limit check (MUST be FIRST — before any other logic).
+     * Step 0a: Pro subscription token check (RUNS FIRST — before rate limit).
+     *
+     * T018: Clients that have a valid Pro subscription send their token via the
+     * x-pro-token request header. The token is a UUID stored in localStorage
+     * after a successful Stripe checkout. We check it against Upstash Redis —
+     * if it is "active", the user gets unlimited generations and we skip the
+     * IP rate limit check entirely.
+     *
+     * Token lifecycle:
+     *   checkout creates pending token → webhook activates token →
+     *   success URL delivers token to client → client stores in localStorage →
+     *   client sends as x-pro-token header → this check grants Pro bypass
+     *
+     * Fails closed: if Redis is down or token is missing/invalid, we fall through
+     * to the IP rate limit as if the user is free tier. No Pro access is granted
+     * on Redis errors. See src/lib/subscription-store.ts for full design.
+     */
+    const proToken = request.headers.get("x-pro-token");
+    const isProSubscriber = await isProActive(proToken);
+
+    /**
+     * Step 0b: Server-side IP rate limit check (skipped for Pro subscribers).
      *
      * This is the genuine server-side gate that prevents anonymous abuse of our
      * paid fal.ai API key. Any bot or script that bypasses the client-side
      * localStorage modal and calls this endpoint directly will be blocked here.
      *
      * We intentionally place this BEFORE JSON parsing so that rate-limited requests
-     * are rejected with minimal server work (no body read, no auth, no fal.ai call).
+     * are rejected with minimal server work (no body read, no fal.ai call).
      *
-     * See src/lib/server-ip-rate-limiter.ts for full rationale, constants (3 req/IP/24h,
-     * 100 global budget per instance), and Upstash Redis upgrade path.
+     * Pro subscribers bypass this check — they have unlimited generations.
+     * See src/lib/server-ip-rate-limiter.ts for full rationale and constants.
      */
-    const rateLimitResult = await checkServerSideRateLimit(request);
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        {
-          error:
-            "Free tier limit reached. Upgrade to Pro for unlimited QR art generations.",
-          upgradeUrl: "/pricing",
-        },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(
-              Math.ceil(
-                (rateLimitResult.windowResetTimestampMs - Date.now()) / 1000
-              )
-            ),
-            "X-RateLimit-Remaining": "0",
+    if (!isProSubscriber) {
+      const rateLimitResult = await checkServerSideRateLimit(request);
+      if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+          {
+            error:
+              "Free tier limit reached. Upgrade to Pro for unlimited QR art generations.",
+            upgradeUrl: "/pricing",
           },
-        }
-      );
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(
+                Math.max(1, rateLimitResult.retryAfter)
+              ),
+              "X-RateLimit-Remaining": "0",
+            },
+          }
+        );
+      }
     }
 
     /**

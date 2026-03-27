@@ -7,7 +7,7 @@
  * It replaces the former src/app/layout.tsx, which is now a pass-through.
  *
  * WHAT THIS PRESERVES FROM THE ORIGINAL layout.tsx:
- *   1. Geist Sans + Geist Mono Google Fonts (CSS variables --font-geist-*)
+ *   1. Global typography variables for sans + mono body styling
  *   2. globals.css import (Tailwind + custom dark-theme styles)
  *   3. SiteHeaderNavigation (sticky header, shown on all pages)
  *   4. SiteFooterSection (shown on all pages)
@@ -32,7 +32,6 @@
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
@@ -41,24 +40,17 @@ import SiteFooterSection from "@/components/SiteFooterSection";
 import "../globals.css";
 
 /**
- * Load Geist Sans — the primary body font.
- * CSS variable --font-geist-sans is referenced in globals.css.
- * Geist is Vercel's own font family — clean, modern, and highly readable.
- * It gives a professional SaaS appearance with zero design overhead.
+ * Use a local/system font stack instead of next/font Google fetches.
+ * This keeps builds deterministic in sandboxed or CI environments where
+ * outbound font downloads are blocked, while preserving the same CSS variable
+ * contract expected by globals.css.
  */
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const sansFontVariables = "[--font-geist-sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif]";
 
 /**
- * Load Geist Mono — used for code-like elements (URLs, technical text).
- * CSS variable --font-geist-mono is referenced in globals.css.
+ * Matching local/system mono stack for code-like elements.
  */
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const monoFontVariables = "[--font-geist-mono:'SFMono-Regular',Consolas,'Liberation_Mono',Menlo,monospace]";
 
 /**
  * The canonical site URL — qrart.symplyai.io is the symplyai.io subdomain assigned to this product.
@@ -163,7 +155,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${sansFontVariables} ${monoFontVariables} h-full antialiased`}
     >
       <head>
         {/*
