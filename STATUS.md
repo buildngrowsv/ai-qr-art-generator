@@ -1,6 +1,6 @@
 # QRArtify — AI QR Code Art Generator — Status
 
-**Last updated:** 2026-03-25 (Builder 6 — canonical URL fix, verified live)
+**Last updated:** 2026-03-26 (Builder 6 — canonical URL fix verified, task abfb1ad2 closed)
 **Repo:** github.com/buildngrowsv/ai-qr-art-generator
 **Stack:** Next.js 15, TypeScript, Tailwind CSS v4, fal.ai FLUX, Stripe, next-intl (EN+ES)
 
@@ -60,4 +60,4 @@
   subsequent deploys with working routes (commits 24e725d, 8b2602f, 7c25b7c, 146cf7c, cdfd29b,
   45d0ed4, 24e725d, 9ad3190, 8b39a2a)
 - 2026-03-25 Builder 6: canonical URL fix — all siteUrl/BASE_URL updated to qrart.symplyai.io
-  from hardcoded ai-qr-art-generator.vercel.app (commit TBD)
+  from hardcoded ai-qr-art-generator.vercel.app (commit e5b5b94)
