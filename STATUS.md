@@ -49,6 +49,23 @@
 - EN+ES i18n routing working ✅
 - Canonical URLs fixed: robots.txt, sitemap.xml, OG tags, hreflang all use qrart.symplyai.io ✅
 
+## T034 Posture Sign-Off (Builder 6 — 2026-03-26)
+
+**Paid API exposure posture: FREEMIUM HOSTED with IP rate gate — ACCEPTED**
+
+This repo uses our FAL_KEY (hosted generation, not BYOK). Server-side gate verified per
+`clone-factory-quality-gates.md` Gate 7 minimum-acceptable standard:
+
+| Gate | Implementation | File | Status |
+|------|---------------|------|--------|
+| IP rate limit before fal.ai call | 3 req/IP/24h (in-memory Map) + 100 global instance budget | `src/lib/server-ip-rate-limiter.ts` | ✅ IN PLACE |
+| Gate runs FIRST (line 65 route.ts) | `checkServerSideRateLimit(request)` before JSON parse | `src/app/api/generate/route.ts` | ✅ VERIFIED |
+| 429 returned on limit exceeded | Retry-After header, upgrade URL returned | same | ✅ VERIFIED |
+
+Posture documented in code comments (`PRODUCT POSTURE` section in `server-ip-rate-limiter.ts`).
+Known limitation: per-process state resets on cold start; Upstash upgrade path documented.
+Auth+credits system is the full fix (TODO post-launch); IP rate limit is the minimum gate.
+
 ## Remaining Items (BCL / Dashboard)
 
 - [ ] Verify Stripe webhook endpoint in Stripe dashboard points to https://qrart.symplyai.io/api/stripe/webhook
