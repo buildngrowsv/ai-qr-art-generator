@@ -38,6 +38,7 @@ import { routing } from "@/i18n/routing";
 import SiteHeaderNavigation from "@/components/SiteHeaderNavigation";
 import SiteFooterSection from "@/components/SiteFooterSection";
 import "../globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 /**
  * Use a local/system font stack instead of next/font Google fetches.
@@ -179,6 +180,10 @@ export default async function LocaleLayout({
        * the fixed header height (h-16 = 4rem = 64px).
        */}
       <body className="min-h-full flex flex-col pt-16">
+        {/* GA4 — conditionally rendered; set NEXT_PUBLIC_GA_ID in Vercel env to activate */}
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
         {/*
          * NextIntlClientProvider makes message translations available to
          * client components via useTranslations(). Without this wrapper,
