@@ -8,6 +8,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { RelatedToolsFooterSection } from "@/components/RelatedToolsFooterSection";
 import { Link } from "@/i18n/navigation";
 
 export default function SiteFooterSection() {
@@ -79,6 +80,7 @@ export default function SiteFooterSection() {
           <p className="text-sm text-zinc-600 text-center">
             &copy; {new Date().getFullYear()} {t("copyright")}
           </p>
+          <RelatedToolsFooterSection />
         </div>
       </div>
     </footer>
