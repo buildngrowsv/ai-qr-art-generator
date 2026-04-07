@@ -30,6 +30,23 @@ import type { ArtStylePresetDefinition } from "@/components/ArtStylePresetSelect
 import QrArtPreviewDisplay from "@/components/QrArtPreviewDisplay";
 import GenerateQrArtButton from "@/components/GenerateQrArtButton";
 
+function trackGa4Event(
+  eventName: string,
+  eventParams: Record<string, unknown> = {}
+) {
+  if (typeof window === "undefined") return;
+  const win = window as Window & {
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  };
+  if (typeof win.gtag === "function") {
+    win.gtag("event", eventName, eventParams);
+    return;
+  }
+  win.dataLayer = win.dataLayer || [];
+  win.dataLayer.push(["event", eventName, eventParams]);
+}
+
 export default function QrArtGenerationDashboardPage() {
   const t = useTranslations("Dashboard");
   /**
@@ -85,6 +102,11 @@ export default function QrArtGenerationDashboardPage() {
       return;
     }
 
+    trackGa4Event("qr_art_generate", {
+      product: "ai-qr-art-generator",
+      preset: selectedPresetId,
+      hasCustomPrompt: !selectedPresetId && Boolean(stylePromptInput.trim()),
+    });
     setIsCurrentlyGenerating(true);
     setGenerationErrorMessage(null);
     setGeneratedImageUrl(null);

@@ -14,6 +14,23 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ALL_PRICING_TIERS, PricingTierDefinition } from "@/lib/StripePricingConfiguration";
 
+function trackGa4Event(
+  eventName: string,
+  eventParams: Record<string, unknown> = {}
+) {
+  if (typeof window === "undefined") return;
+  const win = window as Window & {
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  };
+  if (typeof win.gtag === "function") {
+    win.gtag("event", eventName, eventParams);
+    return;
+  }
+  win.dataLayer = win.dataLayer || [];
+  win.dataLayer.push(["event", eventName, eventParams]);
+}
+
 function resolveStripePaymentLinkForTier(tierId: string): string | null {
   if (tierId === "pro") {
     return process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_PRO?.trim() || null;
@@ -30,6 +47,10 @@ export default function PricingTierCards() {
   const tCard = useTranslations("PricingCards");
 
   async function handlePricingTierCtaClick(tier: PricingTierDefinition): Promise<void> {
+    trackGa4Event("qr_art_pricing_click", {
+      product: "ai-qr-art-generator",
+      tier: tier.tierId,
+    });
     if (tier.tierId === "free") {
       router.push("/dashboard");
       return;
