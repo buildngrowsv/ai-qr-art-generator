@@ -72,6 +72,14 @@ export default function SiteFooterSection() {
               <li>
                 <span className="text-sm text-zinc-500">{t("terms")}</span>
               </li>
+              <li>
+                <a
+                  href="/refund-policy"
+                  className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  Refund Policy
+                </a>
+              </li>
             </ul>
           </div>
         </div>
