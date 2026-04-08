@@ -51,5 +51,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
+
+  entries.push({
+    url: `${BASE_URL}/vs/qr-code-monkey`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  });
+
+  entries.push({
+    url: `${BASE_URL}/vs/qr-tiger`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  });
+
   return entries;
 }
