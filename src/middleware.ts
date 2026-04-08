@@ -30,5 +30,5 @@ export const config = {
   // - /_next/* (Next.js build assets)
   // - /_vercel/* (Vercel platform internals)
   // - /.*\..*$ (static files with extensions: .ico, .png, .svg, .js, etc.)
-  matcher: ["/((?!api|vs|_next|_vercel|refund-policy|refund|.*\\..*).*)"],
+  matcher: ["/((?!api|vs|_next|_vercel|privacy|privacy-policy|terms|terms-of-service|refund-policy|refund|.*\\..*).*)"],
 };
