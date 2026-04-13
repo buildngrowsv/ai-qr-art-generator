@@ -33,11 +33,26 @@ export async function generateMetadata({
       locale: locale === "es" ? "es_ES" : "en_US",
       url: canonical,
       siteName: "QR Art AI",
+      /*
+       * og:image — references the dynamic opengraph-image.tsx at src/app/opengraph-image.tsx.
+       * This was missing (fleet OG audit 2026-04-13 found qrart.symplyai.io serving
+       * no preview image on social shares). Next.js resolves "/opengraph-image"
+       * against metadataBase set in the locale layout.
+       */
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "QR Art AI — Transform URLs into Stunning QR Code Art",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: ["/opengraph-image"],
     },
     robots: { index: true, follow: true },
     alternates: {
