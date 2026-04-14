@@ -23,7 +23,9 @@ const PATH_SPECS: PathSpec[] = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const entries: MetadataRoute.Sitemap = [];
+  const entries: MetadataRoute.Sitemap = [    { url: `${BASE_URL}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+  ];
 
   for (const spec of PATH_SPECS) {
     const enUrl = spec.path === "" ? BASE_URL : `${BASE_URL}${spec.path}`;
