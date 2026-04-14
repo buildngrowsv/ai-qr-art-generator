@@ -20,6 +20,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { BreadcrumbJsonLd } from "@/components/BreadcrumbJsonLd";
 const SITE_URL = "https://qrcode.symplyai.io";
 
 export const metadata: Metadata = {
@@ -65,6 +66,13 @@ export default function VsIndexPage() {
     <div className="min-h-screen bg-[#0a0a0f] text-[#f0f0f5]">
       {/* Navigation back to main site */}
       <nav className="border-b border-[#1e1e2e] px-6 py-4">
+        {/* BreadcrumbList JSON-LD — breadcrumb rich snippets in Google SERPs */}
+        <BreadcrumbJsonLd
+          items={[
+            { name: "Home", url: "" },
+            { name: "Alternatives", url: `${""}/vs` },
+          ]}
+        />
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link
             href="/"
