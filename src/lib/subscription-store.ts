@@ -179,14 +179,16 @@ export async function activateToken(token: string): Promise<boolean> {
       "[subscription-store] activateToken: Redis unavailable — cannot persist Pro status.",
       { token }
     );
-    return;
+    return false;
   }
 
   try {
     await redis.setex(subTokenKey(token), ACTIVE_TTL_SECONDS, "active");
     console.log("[subscription-store] activateToken: token activated in Redis", { token });
+    return true;
   } catch (err) {
     console.error("[subscription-store] activateToken: Redis write failed:", err);
+    return false;
     // Fail silently — webhook will retry, and we don't want to return 500 to Stripe
   }
 }
