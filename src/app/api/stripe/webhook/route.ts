@@ -157,7 +157,21 @@ export async function POST(request: NextRequest) {
          */
         const subscriptionToken = checkoutSession.client_reference_id;
         if (subscriptionToken) {
-          await activateToken(subscriptionToken);
+          const activated = await activateToken(subscriptionToken);
+
+          if (!activated) {
+
+            console.error("[stripe-webhook] CRITICAL: activateToken failed — returning 500 so Stripe retries");
+
+            return NextResponse.json(
+
+              { received: true, processed: false, error: "Token activation failed — Redis unavailable" },
+
+              { status: 500 }
+
+            );
+
+          }
           console.log("[Stripe Webhook] checkout.session.completed — Pro token activated", {
             token: subscriptionToken,
             customer: checkoutSession.customer,

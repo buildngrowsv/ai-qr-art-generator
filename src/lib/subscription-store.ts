@@ -172,7 +172,7 @@ export async function createPendingToken(): Promise<string> {
  * to 13 months. If the token was never stored (no Redis at checkout time),
  * we create it as "active" directly so the user gets Pro access.
  */
-export async function activateToken(token: string): Promise<void> {
+export async function activateToken(token: string): Promise<boolean> {
   const redis = getRedisClient();
   if (!redis) {
     console.warn(
