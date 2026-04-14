@@ -76,10 +76,7 @@ const REQUIRED_VARS = [
   { name: "GOOGLE_CLIENT_ID", description: "Google OAuth Client ID" },
   { name: "GOOGLE_CLIENT_SECRET", description: "Google OAuth Client Secret" },
   { name: "STRIPE_SECRET_KEY", description: "Stripe secret API key (sk_live_* or sk_test_*)" },
-  { name: "STRIPE_PUBLISHABLE_KEY", description: "Stripe publishable key (pk_live_* or pk_test_*)" },
   { name: "STRIPE_WEBHOOK_SECRET", description: "Stripe webhook signing secret (whsec_*)" },
-  { name: "STRIPE_PRICE_BASIC", description: "Stripe price ID for Basic tier" },
-  { name: "STRIPE_PRICE_PRO", description: "Stripe price ID for Pro tier" },
   { name: "FAL_KEY", description: "fal.ai API key for AI image generation" },
 ];
 
@@ -111,10 +108,7 @@ const WHITESPACE_SENSITIVE = [
   "GOOGLE_CLIENT_SECRET",
   "BETTER_AUTH_SECRET",
   "STRIPE_SECRET_KEY",
-  "STRIPE_PUBLISHABLE_KEY",
   "STRIPE_WEBHOOK_SECRET",
-  "STRIPE_PRICE_BASIC",
-  "STRIPE_PRICE_PRO",
   "FAL_KEY",
   "RESEND_API_KEY",
   "DATABASE_URL",
