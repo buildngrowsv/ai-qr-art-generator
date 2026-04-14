@@ -30,7 +30,7 @@
  * ADDED: 2026-03-24 as part of EN+ES i18n rollout (next-intl ^3.26.5).
  */
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -107,6 +107,20 @@ export async function generateMetadata(): Promise<Metadata> {
  * - pt-16: 4rem offset for the fixed sticky header (h-16 = 64px)
  * - main flex-1: pushes footer to the bottom by expanding the content area
  */
+/**
+ * Viewport configuration — mobile-first responsive settings + theme color.
+ * Theme color tints the browser chrome on mobile (address bar, status bar).
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+    { media: "(prefers-color-scheme: light)", color: "#7c3aed" },
+  ],
+};
+
 export default async function LocaleLayout({
   children,
   params,
