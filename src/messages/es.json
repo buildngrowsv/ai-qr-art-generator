@@ -1,7 +1,7 @@
 {
   "Meta": {
     "title": "QR Art AI — Convierte URLs en arte QR impresionante",
-    "description": "Genera códigos QR artísticos con IA. Convierte cualquier URL en arte escaneable. Pruébalo gratis y obtén resultados al instante. Ideal para marketing, eventos y marca.",
+    "description": "Genera códigos QR artísticos con IA. Convierte cualquier URL en arte escaneable al instante. Ideal para marketing y marca. Gratis.",
     "keywordList": [
       "arte código QR",
       "generador QR IA",
@@ -70,16 +70,40 @@
     "tryFree": "Probar gratis — sin registro",
     "viewPricing": "Ver precios",
     "heroStats": [
-      { "value": "100%", "label": "Escaneables" },
-      { "value": "<30s", "label": "Tiempo de generación" },
-      { "value": "50+", "label": "Estilos" },
-      { "value": "4K", "label": "Resolución" }
+      {
+        "value": "100%",
+        "label": "Escaneables"
+      },
+      {
+        "value": "<30s",
+        "label": "Tiempo de generación"
+      },
+      {
+        "value": "50+",
+        "label": "Estilos"
+      },
+      {
+        "value": "4K",
+        "label": "Resolución"
+      }
     ],
     "styleExamples": [
-      { "styleLabel": "Cyberpunk", "gradientColors": "from-violet-600 to-cyan-500" },
-      { "styleLabel": "Jardín japonés", "gradientColors": "from-pink-400 to-green-400" },
-      { "styleLabel": "Olas del océano", "gradientColors": "from-blue-600 to-amber-400" },
-      { "styleLabel": "Galaxia", "gradientColors": "from-purple-800 to-pink-500" }
+      {
+        "styleLabel": "Cyberpunk",
+        "gradientColors": "from-violet-600 to-cyan-500"
+      },
+      {
+        "styleLabel": "Jardín japonés",
+        "gradientColors": "from-pink-400 to-green-400"
+      },
+      {
+        "styleLabel": "Olas del océano",
+        "gradientColors": "from-blue-600 to-amber-400"
+      },
+      {
+        "styleLabel": "Galaxia",
+        "gradientColors": "from-purple-800 to-pink-500"
+      }
     ],
     "featuresTitleBefore": "Por qué elegir",
     "featuresTitleAccent": "QR Art AI",
