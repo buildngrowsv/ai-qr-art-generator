@@ -16,7 +16,10 @@
     "QR Tiger",
     "Beaconstac",
     "Scanova",
-    "Unitag"
+    "Unitag",
+    "QRCode AI",
+    "Stable Diffusion QR",
+    "Hovercode"
   ],
   "useCases": [
     "create branded QR codes with AI art",

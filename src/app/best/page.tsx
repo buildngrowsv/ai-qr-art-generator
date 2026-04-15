@@ -103,10 +103,10 @@ export default function BestIndexPage() {
                     className="group p-6 rounded-xl bg-surface-secondary border border-white/5 hover:border-brand-500/30 transition-colors"
                   >
                     <h2 className="text-lg font-semibold mb-2 group-hover:text-brand-400 transition-colors">
-                      {page.title}
+                      Best for {page.audience}
                     </h2>
                     <p className="text-sm text-text-secondary line-clamp-3">
-                      {page.description}
+                      {page.whyFit}
                     </p>
                     <span className="inline-block mt-4 text-sm font-medium text-brand-400">
                       Read comparison &rarr;

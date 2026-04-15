@@ -26,7 +26,7 @@ const SITE_URL = "https://qrcode.symplyai.io";
 export const metadata: Metadata = {
   title: "QRArtify vs Competitors — AI QR Code Art Generator Comparisons",
   description:
-    "See how QRArtify compares to QR Code Monkey, QR Tiger, and other QR code generators. Feature-by-feature comparisons to help you choose the best AI QR code art tool.",
+    "See how QRArtify compares to QR Code Monkey, QR Tiger, Beaconstac, Scanova, Unitag, QRCode AI, Stable Diffusion QR, and Hovercode. Feature-by-feature comparisons to help you choose the best AI QR code art tool.",
   alternates: { canonical: `${SITE_URL}/vs` },
   openGraph: {
     title: "QRArtify vs Competitors — AI QR Code Art Generator Comparisons",
@@ -58,6 +58,48 @@ const competitors = [
     tagline: "Enterprise tracking vs creative AI art styles",
     description:
       "QR Tiger focuses on dynamic QR codes with analytics and tracking. QRArtify focuses on making QR codes beautiful with AI art generation across multiple artistic styles.",
+  },
+  {
+    slug: "beaconstac",
+    name: "Beaconstac",
+    tagline: "Enterprise QR management vs AI art generation",
+    description:
+      "Beaconstac offers enterprise QR code management with CRM integrations and analytics. QRArtify transforms QR codes into AI-generated artwork for premium branding.",
+  },
+  {
+    slug: "scanova",
+    name: "Scanova",
+    tagline: "Template-based design vs AI-generated artwork",
+    description:
+      "Scanova provides QR code generation with design templates and scan analytics. QRArtify uses AI to create entirely unique artistic QR codes from your data.",
+  },
+  {
+    slug: "unitag",
+    name: "Unitag",
+    tagline: "Manual visual customization vs AI-powered art",
+    description:
+      "Unitag lets you customize QR codes with shapes, gradients, and colors. QRArtify generates genuine artwork automatically — no design skills needed.",
+  },
+  {
+    slug: "qrcode-ai",
+    name: "QRCode AI",
+    tagline: "Two AI QR generators — which delivers better art?",
+    description:
+      "QRCode AI is another AI-powered QR art generator. Compare style variety, output quality, pricing, and free tier generosity to find your best fit.",
+  },
+  {
+    slug: "stable-diffusion-qr",
+    name: "Stable Diffusion QR",
+    tagline: "One-click web app vs DIY open-source setup",
+    description:
+      "Stable Diffusion QR uses open-source ControlNet for QR art — powerful but requires GPU setup. QRArtify delivers similar results instantly in your browser.",
+  },
+  {
+    slug: "hovercode",
+    name: "Hovercode",
+    tagline: "Dynamic QR management vs AI-generated art",
+    description:
+      "Hovercode offers dynamic QR codes with design options and analytics. QRArtify transforms QR codes into AI-generated artwork that doubles as visual art.",
   },
 ];
 

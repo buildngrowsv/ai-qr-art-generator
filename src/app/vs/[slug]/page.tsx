@@ -211,6 +211,406 @@ const competitors: Record<string, CompetitorData> = {
     verdict:
       "Choose QRArtify if your QR codes need to be visually stunning — for creative marketing, premium packaging, art installations, and branded materials. Choose QR Tiger if you need enterprise QR management with dynamic codes, scan analytics, and team features.",
   },
+  "beaconstac": {
+    name: "Beaconstac",
+    slug: "beaconstac",
+    metaTitle:
+      "QRArtify vs Beaconstac (2026) — AI Art QR Codes vs Enterprise QR Platform",
+    metaDescription:
+      "Compare QRArtify and Beaconstac side by side. AI-generated artistic QR codes vs enterprise-grade dynamic QR management with analytics and integrations.",
+    heroSubtitle:
+      "AI-powered art generation vs enterprise QR management and analytics",
+    introText:
+      "Beaconstac is an enterprise QR code management platform offering dynamic QR codes, scan analytics, bulk generation, and CRM integrations. QRArtify takes a completely different approach: instead of managing QR codes at scale, we use AI to transform them into stunning visual artwork. If you need enterprise QR fleet management, Beaconstac is built for that. If you want QR codes that double as art pieces for premium branding, QRArtify delivers.",
+    features: [
+      {
+        feature: "AI Art Generation",
+        us: "Full AI-powered artistic styles (cyberpunk, watercolor, nature, etc.)",
+        them: "No AI generation — template-based customization",
+      },
+      {
+        feature: "Dynamic QR Codes",
+        us: "Static QR codes with artistic styling",
+        them: "Full dynamic QR support with retargeting",
+      },
+      {
+        feature: "Scan Analytics",
+        us: "Not available (art-focused tool)",
+        them: "GPS-level scan tracking, device analytics, retargeting pixels",
+      },
+      {
+        feature: "CRM Integration",
+        us: "Standalone creative tool",
+        them: "Salesforce, HubSpot, Zapier, and more",
+      },
+      {
+        feature: "Art Styles",
+        us: "8+ unique AI art styles with new output each time",
+        them: "Color, logo, and frame customization only",
+      },
+      {
+        feature: "Bulk Generation",
+        us: "Coming soon (Pro plan)",
+        them: "Full bulk creation and management",
+      },
+      {
+        feature: "Free Tier",
+        us: "3 AI art generations per day, no signup",
+        them: "14-day free trial only",
+      },
+      {
+        feature: "Price (Pro)",
+        us: "$9.90/mo — unlimited AI art generations",
+        them: "From $5/mo (Lite) to $99/mo (Business)",
+      },
+    ],
+    ourAdvantages: [
+      "AI generates truly artistic QR codes — not templates with color swaps",
+      "Every generation produces a unique artwork",
+      "Free tier available without credit card or signup",
+      "Built for creators who want visual impact, not dashboards",
+      "Affordable pricing for individual users",
+    ],
+    theirAdvantages: [
+      "Enterprise-grade dynamic QR code management",
+      "Comprehensive scan analytics with GPS tracking",
+      "CRM integrations (Salesforce, HubSpot, Zapier)",
+      "Bulk QR generation for large-scale campaigns",
+      "White-label solutions for agencies",
+    ],
+    verdict:
+      "Choose QRArtify if you want QR codes that are visually stunning artwork — for business cards, premium packaging, and creative marketing. Choose Beaconstac if you need enterprise QR code fleet management with analytics, CRM integration, and bulk generation.",
+  },
+  "scanova": {
+    name: "Scanova",
+    slug: "scanova",
+    metaTitle:
+      "QRArtify vs Scanova (2026) — AI Art QR Codes vs Standard QR Generator",
+    metaDescription:
+      "Compare QRArtify and Scanova feature by feature. See how AI-generated artistic QR codes compare to traditional QR code generation with design templates.",
+    heroSubtitle:
+      "AI-generated artwork vs traditional QR code design templates",
+    introText:
+      "Scanova is a QR code generator offering dynamic QR codes, design customization with templates, and scan analytics. QRArtify approaches QR codes differently: our AI generates entirely new artistic interpretations of your QR data, producing unique visual artwork rather than templated designs. If you want a traditional QR generator with tracking, Scanova works. If you want QR codes that look like professional artwork, QRArtify is the choice.",
+    features: [
+      {
+        feature: "AI Art Generation",
+        us: "Full AI-powered artistic styles with unique output each time",
+        them: "No AI — template-based design customization",
+      },
+      {
+        feature: "Design Options",
+        us: "8+ AI art styles (cyberpunk, watercolor, neon, minimalist, nature)",
+        them: "Color schemes, logo overlay, pre-built templates",
+      },
+      {
+        feature: "Dynamic QR Codes",
+        us: "Static QR codes with artistic styling",
+        them: "Dynamic QR codes — edit destination after creation",
+      },
+      {
+        feature: "Scan Analytics",
+        us: "Not available (art-focused tool)",
+        them: "Scan tracking with time, location, and device data",
+      },
+      {
+        feature: "Output Uniqueness",
+        us: "Every QR code is a unique AI-generated artwork",
+        them: "Same template produces similar-looking codes",
+      },
+      {
+        feature: "Free Tier",
+        us: "3 AI art generations per day, no signup",
+        them: "Free trial with limited features",
+      },
+      {
+        feature: "Price (Pro)",
+        us: "$9.90/mo — unlimited AI art generations",
+        them: "From $5/mo (Lite) to $49/mo (Business)",
+      },
+    ],
+    ourAdvantages: [
+      "True AI art generation — every QR code is a unique artwork",
+      "Multiple artistic styles beyond simple color/logo customization",
+      "No signup required for free tier",
+      "Modern, creator-focused interface",
+      "Affordable flat-rate pricing",
+    ],
+    theirAdvantages: [
+      "Dynamic QR codes with editable destinations",
+      "Scan analytics and tracking",
+      "Pre-built design templates for quick customization",
+      "Established platform with broader QR type support (vCard, WiFi, etc.)",
+      "White-labeling options for businesses",
+    ],
+    verdict:
+      "Choose QRArtify if you want your QR codes to be genuine works of art — for creative branding, premium print materials, and marketing that stands out. Choose Scanova if you need a traditional QR generator with dynamic codes, scan analytics, and team features.",
+  },
+  "unitag": {
+    name: "Unitag",
+    slug: "unitag",
+    metaTitle:
+      "QRArtify vs Unitag (2026) — AI Art QR Codes vs Visual QR Customization",
+    metaDescription:
+      "Compare QRArtify and Unitag side by side. AI-generated artistic QR codes vs Unitag's visual QR customization with shapes, colors, and logo embedding.",
+    heroSubtitle:
+      "AI-generated art vs manual visual QR customization",
+    introText:
+      "Unitag is a QR code platform known for its visual customization features — custom shapes, gradient colors, logo embedding, and eye-catching designs. QRArtify goes beyond customization: our AI generates entirely new artistic compositions from your QR data. While Unitag lets you decorate a QR code, QRArtify transforms it into genuine artwork. Both improve on plain black-and-white codes, but the approach and output are fundamentally different.",
+    features: [
+      {
+        feature: "AI Art Generation",
+        us: "Full AI-powered artistic generation with unique output every time",
+        them: "No AI — manual visual customization tools",
+      },
+      {
+        feature: "Visual Customization",
+        us: "AI handles all design — choose a style and generate",
+        them: "Deep manual control: shapes, gradients, corners, eyes, colors",
+      },
+      {
+        feature: "Output Uniqueness",
+        us: "Every generation is a one-of-a-kind artwork",
+        them: "Same settings produce visually identical codes",
+      },
+      {
+        feature: "Design Effort",
+        us: "Select style + click generate — AI does the work",
+        them: "Manual design process — more control but more effort",
+      },
+      {
+        feature: "Art Styles",
+        us: "8+ AI styles: cyberpunk, watercolor, nature, neon, minimalist",
+        them: "Shape and color palettes — visually enhanced but not artistic",
+      },
+      {
+        feature: "Dynamic QR Codes",
+        us: "Static QR codes with artistic styling",
+        them: "Dynamic QR codes with tracking",
+      },
+      {
+        feature: "Free Tier",
+        us: "3 AI art generations per day, no signup",
+        them: "Free tier with watermark and limited features",
+      },
+      {
+        feature: "Price (Pro)",
+        us: "$9.90/mo — unlimited AI art generations",
+        them: "From $2.99/mo (Starter) to $12.99/mo (Premium)",
+      },
+    ],
+    ourAdvantages: [
+      "AI generates genuine artwork — not just decorated QR codes",
+      "Zero design effort: pick a style and generate",
+      "Each output is unique — ideal for limited-edition or premium use",
+      "No signup needed for free tier",
+      "Artistic styles that make QR codes conversation starters",
+    ],
+    theirAdvantages: [
+      "Granular manual control over every visual element",
+      "Dynamic QR codes with destination editing",
+      "Very affordable entry-level pricing",
+      "Supports many QR code types (vCard, WiFi, PDF, etc.)",
+      "Well-known platform with established user base",
+    ],
+    verdict:
+      "Choose QRArtify if you want QR codes that are true works of art — generated by AI in seconds with no design skills needed. Choose Unitag if you prefer hands-on visual customization with fine-grained control over shapes, colors, and gradients.",
+  },
+  "qrcode-ai": {
+    name: "QRCode AI",
+    slug: "qrcode-ai",
+    metaTitle:
+      "QRArtify vs QRCode AI (2026) — Which AI QR Code Art Generator Is Better?",
+    metaDescription:
+      "Compare QRArtify and QRCode AI side by side. Two AI-powered QR code art generators — see which delivers better styles, pricing, and output quality.",
+    heroSubtitle:
+      "Two AI QR art generators — which delivers better creative results?",
+    introText:
+      "QRCode AI is another AI-powered QR code art generator that uses generative AI to create artistic QR codes. Both QRArtify and QRCode AI share the same core concept, but they differ in art style variety, output quality, pricing, and user experience. If you're choosing between AI QR tools, this comparison breaks down the key differences so you can pick the one that fits your creative workflow.",
+    features: [
+      {
+        feature: "AI Model Quality",
+        us: "Latest generation AI with fine-tuned QR art models",
+        them: "AI-powered generation with variable output quality",
+      },
+      {
+        feature: "Art Styles",
+        us: "8+ curated styles: cyberpunk, watercolor, nature, neon, minimalist, and more",
+        them: "Multiple styles — selection varies by plan",
+      },
+      {
+        feature: "Scan Reliability",
+        us: "AI-optimized error correction — tested before delivery",
+        them: "AI generation with standard error correction",
+      },
+      {
+        feature: "Output Resolution",
+        us: "High-resolution PNG downloads included",
+        them: "Resolution may vary by plan tier",
+      },
+      {
+        feature: "Free Tier",
+        us: "3 AI art generations per day, no signup required",
+        them: "Limited free generations with watermark",
+      },
+      {
+        feature: "Generation Speed",
+        us: "Under 30 seconds per generation",
+        them: "Varies — can be slower for complex styles",
+      },
+      {
+        feature: "Price (Pro)",
+        us: "$9.90/mo — unlimited AI art generations",
+        them: "Varies by plan — typically $10-20/mo",
+      },
+    ],
+    ourAdvantages: [
+      "Wider variety of curated artistic styles",
+      "No signup required — start generating immediately",
+      "Consistently high scan reliability across all art styles",
+      "Fast generation (under 30 seconds)",
+      "Simple, transparent pricing with generous free tier",
+    ],
+    theirAdvantages: [
+      "Early mover in the AI QR art space",
+      "May offer additional customization parameters",
+      "Active development with new features",
+      "Community of AI art enthusiasts",
+      "Multiple output format options",
+    ],
+    verdict:
+      "Both tools use AI to generate artistic QR codes. Choose QRArtify for a wider selection of curated art styles, no-signup free tier, and reliable scan quality. Choose QRCode AI if you prefer their specific aesthetic or customization options.",
+  },
+  "stable-diffusion-qr": {
+    name: "Stable Diffusion QR",
+    slug: "stable-diffusion-qr",
+    metaTitle:
+      "QRArtify vs Stable Diffusion QR (2026) — Instant AI QR Art vs DIY ControlNet Setup",
+    metaDescription:
+      "Compare QRArtify and Stable Diffusion QR (ControlNet). See why creators choose one-click AI QR art over manual open-source setup with ComfyUI or Automatic1111.",
+    heroSubtitle:
+      "One-click AI QR art vs manual open-source ControlNet workflows",
+    introText:
+      "Stable Diffusion QR uses the open-source Stable Diffusion model with ControlNet to generate artistic QR codes. It's powerful and free, but requires significant technical setup: installing Python, downloading models (several GB), configuring ControlNet parameters, and troubleshooting scan reliability. QRArtify wraps similar AI capabilities in a simple web interface — upload your QR data, pick a style, and get art in under 30 seconds. No GPU, no Python, no configuration required.",
+    features: [
+      {
+        feature: "Setup Required",
+        us: "None — web app, works in any browser",
+        them: "Significant — Python, CUDA, model downloads (5-10 GB), ControlNet config",
+      },
+      {
+        feature: "GPU Needed",
+        us: "No — cloud-processed",
+        them: "Yes — NVIDIA GPU with 8+ GB VRAM recommended",
+      },
+      {
+        feature: "Art Quality",
+        us: "Curated AI styles optimized for QR scanability",
+        them: "Unlimited flexibility but scan reliability requires manual tuning",
+      },
+      {
+        feature: "Scan Reliability",
+        us: "AI-optimized error correction — pre-validated output",
+        them: "Depends on ControlNet strength parameter — often fails to scan",
+      },
+      {
+        feature: "Time to First QR",
+        us: "Under 30 seconds from visiting the site",
+        them: "Hours to days (setup, model download, parameter tuning)",
+      },
+      {
+        feature: "Style Variety",
+        us: "8+ curated styles with consistent quality",
+        them: "Unlimited with custom prompts — but quality varies wildly",
+      },
+      {
+        feature: "Cost",
+        us: "Free tier (3/day) or $9.90/mo Pro",
+        them: "Free (software) but requires expensive GPU hardware or cloud GPU rental",
+      },
+    ],
+    ourAdvantages: [
+      "Zero setup — generate QR art in seconds from any browser",
+      "No GPU required — works on any device including phones",
+      "Pre-optimized for scan reliability — every output is tested",
+      "Curated art styles that consistently produce beautiful results",
+      "Regular updates and new styles without reinstalling anything",
+    ],
+    theirAdvantages: [
+      "Completely free and open-source software",
+      "Unlimited customization via custom prompts and parameters",
+      "Full control over the generation pipeline",
+      "Can integrate into existing Stable Diffusion workflows",
+      "No usage limits (only limited by your hardware)",
+    ],
+    verdict:
+      "Choose QRArtify if you want beautiful AI QR art instantly — no setup, no GPU, no configuration. Choose Stable Diffusion QR if you're a technical user who wants full control over the generation pipeline and already has a Stable Diffusion setup with a capable GPU.",
+  },
+  "hovercode": {
+    name: "Hovercode",
+    slug: "hovercode",
+    metaTitle:
+      "QRArtify vs Hovercode (2026) — AI Art QR Codes vs Dynamic QR with Design Options",
+    metaDescription:
+      "Compare QRArtify and Hovercode side by side. AI-generated artistic QR codes vs dynamic QR codes with design customization and analytics.",
+    heroSubtitle:
+      "AI-powered artwork vs dynamic QR codes with design customization",
+    introText:
+      "Hovercode is a dynamic QR code platform that offers design customization options including colors, logos, shapes, and frames, along with scan analytics and editable destinations. QRArtify takes a fundamentally different approach: instead of customizing standard QR patterns, our AI generates entirely new artistic compositions. Hovercode makes QR codes prettier; QRArtify makes them into art.",
+    features: [
+      {
+        feature: "AI Art Generation",
+        us: "Full AI-powered artistic styles with unique output each time",
+        them: "No AI — manual design customization (colors, logos, shapes)",
+      },
+      {
+        feature: "Dynamic QR Codes",
+        us: "Static QR codes with artistic styling",
+        them: "Full dynamic QR support — edit destination anytime",
+      },
+      {
+        feature: "Scan Analytics",
+        us: "Not available (art-focused tool)",
+        them: "Scan tracking with device, location, and time data",
+      },
+      {
+        feature: "Design Approach",
+        us: "AI generates unique artwork automatically — pick style and go",
+        them: "Manual customization: colors, logos, frames, shapes",
+      },
+      {
+        feature: "Output Uniqueness",
+        us: "Every generation is a one-of-a-kind artwork",
+        them: "Same settings produce identical QR codes",
+      },
+      {
+        feature: "Free Tier",
+        us: "3 AI art generations per day, no signup",
+        them: "Free plan with limited dynamic QR codes",
+      },
+      {
+        feature: "Price (Pro)",
+        us: "$9.90/mo — unlimited AI art generations",
+        them: "From $5/mo (Starter) to $49/mo (Pro)",
+      },
+    ],
+    ourAdvantages: [
+      "AI transforms QR codes into genuine visual art",
+      "Unique output every time — ideal for premium branding",
+      "No design skills needed — AI handles the creative work",
+      "No signup required for free tier",
+      "Affordable flat-rate pricing for unlimited art",
+    ],
+    theirAdvantages: [
+      "Dynamic QR codes — change destination without reprinting",
+      "Scan analytics for campaign tracking",
+      "Manual design control for brand-consistent customization",
+      "Multiple QR code types (URL, vCard, WiFi, etc.)",
+      "Team collaboration features",
+    ],
+    verdict:
+      "Choose QRArtify if you want QR codes that are genuine works of art — visually stunning pieces for premium packaging, creative marketing, and standout business cards. Choose Hovercode if you need dynamic QR codes with scan analytics and straightforward design customization.",
+  },
 };
 
 /**
