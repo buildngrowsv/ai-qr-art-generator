@@ -32,8 +32,8 @@ import type { Metadata, Viewport} from "next";
  */
 export const metadata: Metadata = {
   metadataBase: new URL("https://qrart.symplyai.io"),
-  title: "AI QR Art Generator",
-  description: "AI QR Art Generator — AI-powered tool. Free to try, no sign-up required.",
+  title: "QR Art AI — Transform URLs into Stunning QR Code Art",
+  description: "Generate beautiful, artistic QR codes powered by AI. Turn any URL into scannable art. Free to try, instant results. Perfect for marketing, events, and branding.",
   alternates: {
     canonical: "https://qrart.symplyai.io",
   },
