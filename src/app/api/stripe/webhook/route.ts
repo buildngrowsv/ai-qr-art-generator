@@ -28,7 +28,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import getStripeServerSideClient from "@/lib/StripeClientInitializer";
 import Stripe from "stripe";
-import { activateToken } from "@/lib/subscription-store";
+import { activateToken, cancelToken } from "@/lib/subscription-store";
 
 /**
  * T018: Node.js runtime required for crypto.subtle HMAC (used by Stripe SDK

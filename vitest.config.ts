@@ -15,7 +15,14 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    exclude: ["**/node_modules/**", "**/dist/**", "e2e/**", "testing/templates/e2e/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "e2e/**",
+      "tests/e2e/**",
+      "tests/smoke/**",
+      "testing/templates/e2e/**",
+    ],
   },
   resolve: {
     alias: {
