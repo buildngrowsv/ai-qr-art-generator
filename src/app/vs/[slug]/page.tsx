@@ -218,6 +218,12 @@ const competitors: Record<string, CompetitorData> = {
  * Static generation means these pages load instantly and score well on
  * Core Web Vitals — critical for SEO ranking.
  */
+/**
+ * Reject unknown slugs — Next.js returns 404 immediately without
+ * invoking the page function. Prevents Vercel serverless hangs.
+ */
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return Object.keys(competitors).map((slug) => ({ slug }));
 }
