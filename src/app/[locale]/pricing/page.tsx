@@ -59,7 +59,49 @@ export default async function DedicatedPricingPage({ params }: PricingPageProps)
   const t = await getTranslations("PricingPage");
   const faqItems = t.raw("faqItems") as { question: string; answer: string }[];
 
+  const pricingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "QR Art AI",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Web",
+    url: `${siteUrl}/pricing`,
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Free",
+        price: "0",
+        priceCurrency: "USD",
+        description: "3 QR art generations per day",
+        availability: "https://schema.org/InStock",
+      },
+      {
+        "@type": "Offer",
+        name: "Pro",
+        price: "9",
+        priceCurrency: "USD",
+        description: "Unlimited QR art, priority processing",
+        availability: "https://schema.org/InStock",
+        priceValidUntil: "2027-12-31",
+      },
+      {
+        "@type": "Offer",
+        name: "Business",
+        price: "29",
+        priceCurrency: "USD",
+        description: "Unlimited QR art, API access, commercial license",
+        availability: "https://schema.org/InStock",
+        priceValidUntil: "2027-12-31",
+      },
+    ],
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
+      />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
       <div className="text-center mb-16">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
@@ -87,5 +129,6 @@ export default async function DedicatedPricingPage({ params }: PricingPageProps)
         </div>
       </div>
     </div>
+    </>
   );
 }
