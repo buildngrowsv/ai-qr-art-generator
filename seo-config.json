@@ -19,7 +19,10 @@
     "Unitag",
     "QRCode AI",
     "Stable Diffusion QR",
-    "Hovercode"
+    "Hovercode",
+    "QRCodeChimp",
+    "Flowcode",
+    "Me-QR"
   ],
   "useCases": [
     "create branded QR codes with AI art",
