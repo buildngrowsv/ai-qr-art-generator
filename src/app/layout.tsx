@@ -62,6 +62,57 @@ export const viewport: Viewport = {
 };
 
 
+/**
+ * FAQPage JSON-LD — enables FAQ rich results in Google SERPs.
+ * Product-specific questions about AI QR art generation.
+ */
+const jsonLdFAQ = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "How does QR Art AI work?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Enter any URL and choose an art style. Our AI embeds a fully scannable QR code into a beautiful, artistic image. The result looks like custom artwork while remaining functional as a QR code.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Is QR Art AI free?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, QR Art AI offers a free tier with 3 QR art generations per day. Paid plans start at $9.99/month for unlimited generations and access to premium art styles.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Do the artistic QR codes actually scan?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, every QR art image generated is fully scannable. The AI ensures the QR code pattern remains readable by standard smartphone cameras while integrating it into the artistic design.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What art styles are available for QR codes?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "QR Art AI offers a wide range of styles including watercolor, cyberpunk, nature landscapes, abstract art, anime, steampunk, and minimalist designs. New styles are added regularly.",
+      },
+    },
+  ],
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFAQ) }}
+      />
+      {children}
+    </>
+  );
 }
