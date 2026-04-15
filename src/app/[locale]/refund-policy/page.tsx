@@ -1,6 +1,18 @@
-export const metadata = {
-  title: "Refund Policy | AI Qr Art Generator",
-  description: "Refund policy for AI Qr Art Generator.",
+import type { Metadata } from "next";
+
+const siteUrl = "https://qrart.symplyai.io";
+
+export const metadata: Metadata = {
+  title: "Refund Policy | AI QR Art Generator",
+  description: "Refund policy for AI QR Art Generator.",
+  openGraph: {
+    title: "Refund Policy | AI QR Art Generator",
+    description: "Refund policy for AI QR Art Generator.",
+    url: `${siteUrl}/refund-policy`,
+    type: "website",
+    siteName: "QR Art AI",
+  },
+  alternates: { canonical: `${siteUrl}/refund-policy` },
 };
 
 /**

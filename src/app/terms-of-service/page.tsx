@@ -2,10 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 const PRODUCT_NAME = "AI QR Art Generator";
+const siteUrl = "https://qrart.symplyai.io";
 
 export const metadata: Metadata = {
   title: `Terms of Service | ${PRODUCT_NAME}`,
   description: `Terms of service for ${PRODUCT_NAME}.`,
+  openGraph: {
+    title: `Terms of Service | ${PRODUCT_NAME}`,
+    description: `Terms of service for ${PRODUCT_NAME}.`,
+    url: `${siteUrl}/terms-of-service`,
+    type: "website",
+    siteName: "QR Art AI",
+  },
+  alternates: { canonical: `${siteUrl}/terms-of-service` },
 };
 
 export default function TermsOfServicePage() {

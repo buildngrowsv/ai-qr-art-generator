@@ -13,9 +13,21 @@
  * policy page linked from the footer or legal section.
  */
 
-export const metadata = {
+import type { Metadata } from "next";
+
+const siteUrl = "https://qrart.symplyai.io";
+
+export const metadata: Metadata = {
   title: "Refund Policy | QR Art AI",
   description: "Refund policy for QR Art AI.",
+  openGraph: {
+    title: "Refund Policy | QR Art AI",
+    description: "Refund policy for QR Art AI.",
+    url: `${siteUrl}/refund-policy`,
+    type: "website",
+    siteName: "QR Art AI",
+  },
+  alternates: { canonical: `${siteUrl}/refund-policy` },
 };
 
 export default function RefundPolicyPage() {

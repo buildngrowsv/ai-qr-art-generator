@@ -7,10 +7,19 @@
  */
 import type { Metadata } from "next";
 
+const siteUrl = "https://qrart.symplyai.io";
+
 export const metadata: Metadata = {
   title: "Privacy Policy | AI QR Art Generator",
   description: "Privacy policy for AI QR Art Generator — how we handle your data.",
-  alternates: { canonical: "https://qrart.symplyai.io/privacy" },
+  openGraph: {
+    title: "Privacy Policy | AI QR Art Generator",
+    description: "Privacy policy for AI QR Art Generator — how we handle your data.",
+    url: `${siteUrl}/privacy`,
+    type: "website",
+    siteName: "QR Art AI",
+  },
+  alternates: { canonical: `${siteUrl}/privacy` },
 };
 
 export default function PrivacyPage() {
