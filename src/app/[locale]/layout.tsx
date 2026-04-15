@@ -176,6 +176,23 @@ const jsonLdBreadcrumb = {
   ],
 };
 
+
+/**
+ * WebSite JSON-LD — establishes site identity in Google search results
+ * and enables sitelinks searchbox eligibility.
+ */
+const jsonLdWebSite = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "QR Art AI",
+  url: "https://qrart.symplyai.io",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: "https://qrart.symplyai.io/?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export default async function LocaleLayout({
   children,
   params,
@@ -254,6 +271,10 @@ export default async function LocaleLayout({
               <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }}
+        />
+              <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
       {/*
