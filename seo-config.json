@@ -1,1 +1,40 @@
-{}
+{
+  "productName": "QRArtAI",
+  "productSlug": "ai-qr-art-generator",
+  "industries": [
+    "Restaurants",
+    "E-commerce Sellers",
+    "Real Estate Agents",
+    "Event Planners",
+    "Marketing Agencies",
+    "Small Business Owners",
+    "Graphic Designers",
+    "Musicians and Artists"
+  ],
+  "competitors": [
+    "QR Code Monkey",
+    "QR Tiger",
+    "Beaconstac",
+    "Scanova",
+    "Unitag"
+  ],
+  "useCases": [
+    "create branded QR codes with AI art",
+    "generate artistic QR codes for marketing materials",
+    "design custom QR codes for product packaging",
+    "make visually appealing QR codes for menus",
+    "build branded QR codes for business cards"
+  ],
+  "coreFeatures": [
+    "AI-powered artistic QR code generation",
+    "Instant results in under 30 seconds",
+    "Multiple art styles and customization",
+    "High-resolution PNG downloads",
+    "Fully scannable artistic codes"
+  ],
+  "pricing": {
+    "free": "3 free QR codes per day",
+    "basic": "$4.99/mo",
+    "pro": "$9.99/mo"
+  }
+}
