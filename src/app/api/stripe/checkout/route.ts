@@ -191,6 +191,9 @@ export async function POST(request: NextRequest) {
       `client_reference_id=${encodeURIComponent(subscriptionToken)}`,
       `success_url=${encodeURIComponent(successUrl)}`,
       `cancel_url=${encodeURIComponent(cancelUrl)}`,
+      // P1 fix: carry proToken in subscription_data.metadata so the webhook can
+      // revoke Pro access when customer.subscription.deleted fires.
+      `subscription_data[metadata][proToken]=${encodeURIComponent(subscriptionToken)}`,
     ].join("&");
 
     const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
