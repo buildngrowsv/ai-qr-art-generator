@@ -22,6 +22,30 @@
  */
 
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
+
+
+/**
+ * Root-level metadata — fallback for pSEO pages (/for, /vs, /best,
+ * /use-cases) served outside the [locale] layout. The [locale] layout
+ * generateMetadata overrides these for locale-routed pages.
+ */
+export const metadata: Metadata = {
+  metadataBase: new URL("https://qrart.symplyai.io"),
+  title: "AI QR Art Generator",
+  description: "AI QR Art Generator — AI-powered tool. Free to try, no sign-up required.",
+  alternates: {
+    canonical: "https://qrart.symplyai.io",
+  },
+  openGraph: {
+    title: "AI QR Art Generator",
+    description: "AI QR Art Generator — AI-powered tool. Free to try.",
+    type: "website",
+    url: "https://qrart.symplyai.io",
+  },
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true },
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return children;
