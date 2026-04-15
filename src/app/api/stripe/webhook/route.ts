@@ -159,11 +159,11 @@ export async function POST(request: NextRequest) {
         if (subscriptionToken) {
           const activated = await activateToken(subscriptionToken);
           if (!activated) {
-            console.error("[stripe-webhook] CRITICAL: activateToken failed — returning 500 so Stripe retries");
-            return NextResponse.json(
-              { received: true, processed: false, error: "Token activation failed" },
-              { status: 500 }
-            );
+            // Return 200 (not 500) so Stripe stops retrying. 500 caused infinite
+            // retry loops when Redis was not provisioned — customer paid but token
+            // never activated. See continuous-improvement-master.md root cause table.
+            console.error("[stripe-webhook] activateToken failed — Redis unavailable. " +
+              "Returning 200 to prevent infinite retries.", { token: subscriptionToken });
           }
           console.log("[Stripe Webhook] checkout.session.completed — Pro token activated", {
             token: subscriptionToken,
