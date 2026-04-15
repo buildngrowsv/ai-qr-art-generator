@@ -138,6 +138,30 @@ const jsonLdHowTo = {
   ],
 };
 
+
+/**
+ * Organization JSON-LD — tells Google this site belongs to a real business
+ * entity (SymplyAI). Improves E-E-A-T signals and Knowledge Panel eligibility.
+ */
+const jsonLdOrganization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "QR Art AI",
+  url: "https://qrart.symplyai.io",
+  logo: "https://qrart.symplyai.io/icon.png",
+  description: "AI QR art generator — create artistic QR codes.",
+  parentOrganization: {
+    "@type": "Organization",
+    name: "SymplyAI",
+    url: "https://symplyai.io",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    url: "https://qrart.symplyai.io/contact",
+  },
+};
+
 export default async function LocaleLayout({
   children,
   params,
@@ -208,6 +232,10 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdHowTo) }}
+        />
+              <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
         />
       </head>
       {/*
