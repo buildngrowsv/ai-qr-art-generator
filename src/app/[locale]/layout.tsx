@@ -121,6 +121,23 @@ export const viewport: Viewport = {
   ],
 };
 
+/**
+ * HowTo JSON-LD — enables "How to" rich results in Google SERPs.
+ */
+const jsonLdHowTo = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "How to Create Artistic QR Codes with AI",
+  description: "Use QR Art AI to transform any URL into a stunning, scannable QR code artwork in seconds.",
+  totalTime: "PT30S",
+  tool: { "@type": "HowToTool", name: "QR Art AI (qrart.symplyai.io)" },
+  step: [
+    { "@type": "HowToStep", position: 1, name: "Enter your URL and style", text: "Paste the URL you want to encode and choose an art style for your QR code." },
+    { "@type": "HowToStep", position: 2, name: "AI generates your QR art", text: "Our AI creates a beautiful, artistic QR code that is always scannable and matches your chosen style." },
+    { "@type": "HowToStep", position: 3, name: "Download your QR art", text: "Preview the artistic QR code and download in high resolution for print or digital use." },
+  ],
+};
+
 export default async function LocaleLayout({
   children,
   params,
@@ -187,6 +204,10 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdHowTo) }}
         />
       </head>
       {/*
