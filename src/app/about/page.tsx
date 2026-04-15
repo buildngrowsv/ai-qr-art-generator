@@ -81,6 +81,21 @@ export default function AboutPage() {
               .
             </p>
           </section>
+
+          <section className="rounded-xl border border-violet-800/50 bg-violet-950/30 p-6 text-center">
+            <h2 className="mb-3 text-2xl font-semibold">
+              Ready to Get Started?
+            </h2>
+            <p className="mb-5 text-zinc-300">
+              Try it free today — no credit card required.
+            </p>
+            <a
+              href="/pricing"
+              className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-500"
+            >
+              View Pricing
+            </a>
+          </section>
         </div>
       </div>
     </main>
