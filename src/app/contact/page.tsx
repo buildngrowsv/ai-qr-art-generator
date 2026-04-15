@@ -68,6 +68,21 @@ export default function ContactPage() {
               </a> 
               portfolio of AI-powered tools.
             </p>
+
+          <div className="rounded-xl border border-violet-800/50 bg-violet-950/30 p-6 text-center">
+            <h2 className="mb-2 text-xl font-semibold">
+              Ready to Get Started?
+            </h2>
+            <p className="mb-4 text-zinc-400">
+              Try it free — no credit card required.
+            </p>
+            <a
+              href="/pricing"
+              className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 font-medium text-white transition hover:bg-violet-500"
+            >
+              View Pricing
+            </a>
+          </div>
           </div>
         </div>
       </div>
