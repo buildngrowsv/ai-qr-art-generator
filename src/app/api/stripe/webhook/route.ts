@@ -272,15 +272,14 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
+    // Return 200 despite the error so Stripe does NOT retry indefinitely.
+    // If this is a code bug (missing metadata, wrong schema, etc.), retrying
+    // the same event will produce the same error forever. Transient failures
+    // (e.g. Redis down) are handled inside each event handler.
     console.error("[Stripe Webhook] Unexpected error:", error);
-
-    /*
-     * Return 500 on unexpected errors. Stripe will retry, which is what we want —
-     * if this was a transient error (database timeout, etc.), the retry will succeed.
-     */
     return NextResponse.json(
-      { error: "Webhook processing failed" },
-      { status: 500 }
+      { received: true, error: "Handler error logged" },
+      { status: 200 }
     );
   }
 }
