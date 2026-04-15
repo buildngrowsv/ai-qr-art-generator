@@ -1,9 +1,12 @@
 /**
  * QR Art AI — sitemap with EN/ES alternates (as-needed locale prefix).
  * Each logical path emits both unprefixed (default EN) and /es/* URLs.
+ *
+ * UPDATED: 2026-04-15 — added /blog and /blog/[slug] entries.
  */
 
 import type { MetadataRoute } from "next";
+import { getAllBlogPosts } from "./blog/blog-posts";
 
 // Canonical domain for sitemap URLs — qrart.symplyai.io.
 // Fixed 2026-03-25 (Builder 6): was pointing to vercel.app; sitemap and robots must agree
@@ -67,6 +70,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: 0.8,
   });
+
+  // Blog index page
+  entries.push({
+    url: `${BASE_URL}/blog`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.85,
+  });
+
+  // Individual blog posts
+  for (const post of getAllBlogPosts()) {
+    entries.push({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    });
+  }
 
   return entries;
 }
